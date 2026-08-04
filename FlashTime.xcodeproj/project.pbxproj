@@ -1,0 +1,808 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5080555C30226996007CDFD7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5080555B30226995007CDFD7 /* WidgetKit.framework */; };
+		5080555E30226996007CDFD7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5080555D30226996007CDFD7 /* SwiftUI.framework */; };
+		5080556B30226998007CDFD7 /* FlashTimeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5080555930226995007CDFD7 /* FlashTimeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5080557C30226A67007CDFD7 /* MemoryPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557930226A67007CDFD7 /* MemoryPhoto.swift */; };
+		5080557D30226A67007CDFD7 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557730226A67007CDFD7 /* AppGroup.swift */; };
+		5080557E30226A67007CDFD7 /* PhotoAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557A30226A67007CDFD7 /* PhotoAccess.swift */; };
+		5080557F30226A67007CDFD7 /* MemoriesFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557830226A67007CDFD7 /* MemoriesFetcher.swift */; };
+		5080558030226A67007CDFD7 /* MemoryPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557930226A67007CDFD7 /* MemoryPhoto.swift */; };
+		5080558130226A67007CDFD7 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557730226A67007CDFD7 /* AppGroup.swift */; };
+		5080558230226A67007CDFD7 /* PhotoAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557A30226A67007CDFD7 /* PhotoAccess.swift */; };
+		5080558330226A67007CDFD7 /* MemoriesFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557830226A67007CDFD7 /* MemoriesFetcher.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5080551D30223544007CDFD7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5080550730223542007CDFD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5080550E30223542007CDFD7;
+			remoteInfo = FlashTime;
+		};
+		5080552730223544007CDFD7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5080550730223542007CDFD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5080550E30223542007CDFD7;
+			remoteInfo = FlashTime;
+		};
+		5080556930226998007CDFD7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5080550730223542007CDFD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5080555830226995007CDFD7;
+			remoteInfo = FlashTimeWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5080556C30226998007CDFD7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5080556B30226998007CDFD7 /* FlashTimeWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		5080550F30223542007CDFD7 /* FlashTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlashTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5080551C30223544007CDFD7 /* FlashTimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTimeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5080552630223544007CDFD7 /* FlashTimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5080555930226995007CDFD7 /* FlashTimeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FlashTimeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5080555B30226995007CDFD7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		5080555D30226996007CDFD7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		5080557730226A67007CDFD7 /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		5080557830226A67007CDFD7 /* MemoriesFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoriesFetcher.swift; sourceTree = "<group>"; };
+		5080557930226A67007CDFD7 /* MemoryPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryPhoto.swift; sourceTree = "<group>"; };
+		5080557A30226A67007CDFD7 /* PhotoAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAccess.swift; sourceTree = "<group>"; };
+		5080558530226AD3007CDFD7 /* FlashTimeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlashTimeWidgetExtension.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5080556F30226998007CDFD7 /* Exceptions for "FlashTimeWidget" folder in "FlashTimeWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5080555830226995007CDFD7 /* FlashTimeWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		5080551130223542007CDFD7 /* FlashTime */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashTime;
+			sourceTree = "<group>";
+		};
+		5080551F30223544007CDFD7 /* FlashTimeTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashTimeTests;
+			sourceTree = "<group>";
+		};
+		5080552930223544007CDFD7 /* FlashTimeUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FlashTimeUITests;
+			sourceTree = "<group>";
+		};
+		5080555F30226996007CDFD7 /* FlashTimeWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5080556F30226998007CDFD7 /* Exceptions for "FlashTimeWidget" folder in "FlashTimeWidgetExtension" target */,
+			);
+			path = FlashTimeWidget;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5080550C30223542007CDFD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080551930223544007CDFD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080552330223544007CDFD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080555630226995007CDFD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5080555E30226996007CDFD7 /* SwiftUI.framework in Frameworks */,
+				5080555C30226996007CDFD7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5080550630223542007CDFD7 = {
+			isa = PBXGroup;
+			children = (
+				5080558530226AD3007CDFD7 /* FlashTimeWidgetExtension.entitlements */,
+				5080551130223542007CDFD7 /* FlashTime */,
+				5080551F30223544007CDFD7 /* FlashTimeTests */,
+				5080552930223544007CDFD7 /* FlashTimeUITests */,
+				5080555F30226996007CDFD7 /* FlashTimeWidget */,
+				5080555A30226995007CDFD7 /* Frameworks */,
+				5080551030223542007CDFD7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5080551030223542007CDFD7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5080550F30223542007CDFD7 /* FlashTime.app */,
+				5080551C30223544007CDFD7 /* FlashTimeTests.xctest */,
+				5080552630223544007CDFD7 /* FlashTimeUITests.xctest */,
+				5080555930226995007CDFD7 /* FlashTimeWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5080555A30226995007CDFD7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5080557B30226A67007CDFD7 /* Shared */,
+				5080555B30226995007CDFD7 /* WidgetKit.framework */,
+				5080555D30226996007CDFD7 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5080557B30226A67007CDFD7 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				5080557730226A67007CDFD7 /* AppGroup.swift */,
+				5080557830226A67007CDFD7 /* MemoriesFetcher.swift */,
+				5080557930226A67007CDFD7 /* MemoryPhoto.swift */,
+				5080557A30226A67007CDFD7 /* PhotoAccess.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5080550E30223542007CDFD7 /* FlashTime */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5080553030223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTime" */;
+			buildPhases = (
+				5080550B30223542007CDFD7 /* Sources */,
+				5080550C30223542007CDFD7 /* Frameworks */,
+				5080550D30223542007CDFD7 /* Resources */,
+				5080556C30226998007CDFD7 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5080556A30226998007CDFD7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5080551130223542007CDFD7 /* FlashTime */,
+			);
+			name = FlashTime;
+			packageProductDependencies = (
+			);
+			productName = FlashTime;
+			productReference = 5080550F30223542007CDFD7 /* FlashTime.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5080551B30223544007CDFD7 /* FlashTimeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5080553330223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeTests" */;
+			buildPhases = (
+				5080551830223544007CDFD7 /* Sources */,
+				5080551930223544007CDFD7 /* Frameworks */,
+				5080551A30223544007CDFD7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5080551E30223544007CDFD7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5080551F30223544007CDFD7 /* FlashTimeTests */,
+			);
+			name = FlashTimeTests;
+			packageProductDependencies = (
+			);
+			productName = FlashTimeTests;
+			productReference = 5080551C30223544007CDFD7 /* FlashTimeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5080552530223544007CDFD7 /* FlashTimeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5080553630223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeUITests" */;
+			buildPhases = (
+				5080552230223544007CDFD7 /* Sources */,
+				5080552330223544007CDFD7 /* Frameworks */,
+				5080552430223544007CDFD7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5080552830223544007CDFD7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5080552930223544007CDFD7 /* FlashTimeUITests */,
+			);
+			name = FlashTimeUITests;
+			packageProductDependencies = (
+			);
+			productName = FlashTimeUITests;
+			productReference = 5080552630223544007CDFD7 /* FlashTimeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		5080555830226995007CDFD7 /* FlashTimeWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5080557030226998007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeWidgetExtension" */;
+			buildPhases = (
+				5080555530226995007CDFD7 /* Sources */,
+				5080555630226995007CDFD7 /* Frameworks */,
+				5080555730226995007CDFD7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5080555F30226996007CDFD7 /* FlashTimeWidget */,
+			);
+			name = FlashTimeWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = FlashTimeWidgetExtension;
+			productReference = 5080555930226995007CDFD7 /* FlashTimeWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5080550730223542007CDFD7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					5080550E30223542007CDFD7 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					5080551B30223544007CDFD7 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 5080550E30223542007CDFD7;
+					};
+					5080552530223544007CDFD7 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 5080550E30223542007CDFD7;
+					};
+					5080555830226995007CDFD7 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+				};
+			};
+			buildConfigurationList = 5080550A30223542007CDFD7 /* Build configuration list for PBXProject "FlashTime" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5080550630223542007CDFD7;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5080551030223542007CDFD7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5080550E30223542007CDFD7 /* FlashTime */,
+				5080551B30223544007CDFD7 /* FlashTimeTests */,
+				5080552530223544007CDFD7 /* FlashTimeUITests */,
+				5080555830226995007CDFD7 /* FlashTimeWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5080550D30223542007CDFD7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080551A30223544007CDFD7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080552430223544007CDFD7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080555730226995007CDFD7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5080550B30223542007CDFD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5080557C30226A67007CDFD7 /* MemoryPhoto.swift in Sources */,
+				5080557D30226A67007CDFD7 /* AppGroup.swift in Sources */,
+				5080557E30226A67007CDFD7 /* PhotoAccess.swift in Sources */,
+				5080557F30226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080551830223544007CDFD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080552230223544007CDFD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5080555530226995007CDFD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5080558030226A67007CDFD7 /* MemoryPhoto.swift in Sources */,
+				5080558130226A67007CDFD7 /* AppGroup.swift in Sources */,
+				5080558230226A67007CDFD7 /* PhotoAccess.swift in Sources */,
+				5080558330226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5080551E30223544007CDFD7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5080550E30223542007CDFD7 /* FlashTime */;
+			targetProxy = 5080551D30223544007CDFD7 /* PBXContainerItemProxy */;
+		};
+		5080552830223544007CDFD7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5080550E30223542007CDFD7 /* FlashTime */;
+			targetProxy = 5080552730223544007CDFD7 /* PBXContainerItemProxy */;
+		};
+		5080556A30226998007CDFD7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5080555830226995007CDFD7 /* FlashTimeWidgetExtension */;
+			targetProxy = 5080556930226998007CDFD7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5080552E30223544007CDFD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5080552F30223544007CDFD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NT73585HKS;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5080553130223544007CDFD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FlashTime/FlashTime.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FlashTime lit les dates de vos photos pour retrouver celles prises le même jour les années passées. Elles restent sur votre appareil.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTime";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5080553230223544007CDFD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FlashTime/FlashTime.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FlashTime lit les dates de vos photos pour retrouver celles prises le même jour les années passées. Elles restent sur votre appareil.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTime";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5080553430223544007CDFD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTimeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlashTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FlashTime";
+			};
+			name = Debug;
+		};
+		5080553530223544007CDFD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTimeTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlashTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FlashTime";
+			};
+			name = Release;
+		};
+		5080553730223544007CDFD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTimeUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FlashTime;
+			};
+			name = Debug;
+		};
+		5080553830223544007CDFD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTimeUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FlashTime;
+			};
+			name = Release;
+		};
+		5080556D30226998007CDFD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FlashTimeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashTimeWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlashTimeWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTime.FlashTimeWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5080556E30226998007CDFD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FlashTimeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NT73585HKS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FlashTimeWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FlashTimeWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Maxence-Weyermann.FlashTime.FlashTimeWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5080550A30223542007CDFD7 /* Build configuration list for PBXProject "FlashTime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5080552E30223544007CDFD7 /* Debug */,
+				5080552F30223544007CDFD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5080553030223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5080553130223544007CDFD7 /* Debug */,
+				5080553230223544007CDFD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5080553330223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5080553430223544007CDFD7 /* Debug */,
+				5080553530223544007CDFD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5080553630223544007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5080553730223544007CDFD7 /* Debug */,
+				5080553830223544007CDFD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5080557030226998007CDFD7 /* Build configuration list for PBXNativeTarget "FlashTimeWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5080556D30226998007CDFD7 /* Debug */,
+				5080556E30226998007CDFD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5080550730223542007CDFD7 /* Project object */;
+}

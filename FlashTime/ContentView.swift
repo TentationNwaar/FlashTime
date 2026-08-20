@@ -14,49 +14,84 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSettings = false
     @State private var selected: MemoryPhoto?
+    @State private var showLaunch = true
+
+    /// Durée minimale d'affichage du logo, pour que le fondu ne soit pas coupé
+    /// net quand la recherche des souvenirs est immédiate.
+    private let minimumLaunchDuration: TimeInterval = 1.1
 
     var body: some View {
-        NavigationStack {
-            Group {
-                switch viewModel.accessState {
-                case .notDetermined:
-                    OnboardingView { await viewModel.requestAccess() }
-                case .denied:
-                    AccessDeniedView()
-                case .authorized, .limited:
-                    memoriesList
-                }
-            }
-            .navigationTitle("FlashTime")
-            .toolbar {
-                if viewModel.accessState.canReadLibrary {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Image(systemName: "slider.horizontal.3")
-                        }
-                    }
-                }
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsView(settings: viewModel.settings) { new in
-                    Task { await viewModel.applySettings(new) }
-                }
-            }
-            .fullScreenCover(item: $selected) { memory in
-                MemoryDetailView(memory: memory)
+        ZStack {
+            mainContent
+
+            if showLaunch {
+                LaunchOverlayView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
         .task {
             viewModel.refreshAccessState()
+
+            let start = Date()
             await viewModel.reload()
+
+            let elapsed = Date().timeIntervalSince(start)
+            if elapsed < minimumLaunchDuration {
+                try? await Task.sleep(for: .seconds(minimumLaunchDuration - elapsed))
+            }
+
+            withAnimation(.easeInOut(duration: 0.5)) {
+                showLaunch = false
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(settings: viewModel.settings) { new in
+                Task { await viewModel.applySettings(new) }
+            }
+        }
+        .fullScreenCover(item: $selected) { memory in
+            MemoryDetailView(memory: memory)
         }
         .onChange(of: scenePhase) { _, phase in
             // L'utilisateur a pu modifier l'autorisation dans Réglages.
-            if phase == .active {
+            // La garde évite un second chargement pendant l'écran de démarrage,
+            // qui effectue déjà le premier.
+            if phase == .active, !showLaunch {
                 viewModel.refreshAccessState()
                 Task { await viewModel.reload() }
+            }
+        }
+    }
+
+    // MARK: - Structure
+
+    private var mainContent: some View {
+        ZStack {
+            FT.Palette.background.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                FTTopBar(title: "FlashTime") {
+                    if viewModel.accessState.canReadLibrary {
+                        Button {
+                            showSettings = true
+                        } label: {
+                            Image(systemName: "slider.horizontal.3")
+                                .font(.system(size: 15, weight: .light))
+                                .foregroundStyle(FT.Palette.textSecondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                switch viewModel.accessState {
+                case .notDetermined:
+                    onboarding
+                case .denied:
+                    accessDenied
+                case .authorized, .limited:
+                    memoriesList
+                }
             }
         }
     }
@@ -66,33 +101,50 @@ struct ContentView: View {
     @ViewBuilder
     private var memoriesList: some View {
         if viewModel.isLoading && viewModel.memories.isEmpty {
-            ProgressView("Recherche de vos souvenirs…")
+            VStack {
+                Spacer()
+                Text("Recherche en cours")
+                    .ftSectionLabel(secondary: true)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(FT.Palette.background)
         } else if viewModel.memories.isEmpty {
-            EmptyMemoriesView(dateLabel: viewModel.todayLabel)
+            FTMessageScreen(
+                symbol: "calendar",
+                title: "Aucun souvenir\nle \(viewModel.todayLabel)",
+                message: "Votre photothèque ne contient aucune photo prise ce jour-là une année précédente. Revenez demain."
+            )
         } else {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 28, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     ForEach(viewModel.groupedByYearsAgo, id: \.yearsAgo) { group in
                         Section {
                             grid(for: group.photos)
+                                .padding(.bottom, 26)
                         } header: {
-                            sectionHeader(
+                            FTSectionBanner(
                                 title: group.photos.first?.title ?? "",
-                                subtitle: group.photos.first?.subtitle ?? ""
+                                subtitle: group.photos.first?.subtitle
                             )
                         }
                     }
                 }
-                .padding(.bottom, 32)
+                .padding(.bottom, 24)
             }
+            .scrollIndicators(.hidden)
+            .background(FT.Palette.background)
             .refreshable { await viewModel.reload() }
         }
     }
 
     private func grid(for photos: [MemoryPhoto]) -> some View {
         LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), spacing: 3), count: 3),
-            spacing: 3
+            columns: Array(
+                repeating: GridItem(.flexible(), spacing: FT.Metric.gridSpacing),
+                count: 3
+            ),
+            spacing: FT.Metric.gridSpacing
         ) {
             ForEach(photos) { photo in
                 Button {
@@ -105,118 +157,42 @@ struct ContentView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 3)
+        .padding(.horizontal, FT.Metric.gridSpacing)
+        .padding(.top, FT.Metric.gridSpacing)
     }
 
-    private func sectionHeader(title: String, subtitle: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.title3.weight(.semibold))
-            Text(subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(.bar)
-    }
-}
+    // MARK: - États d'accès
 
-// MARK: - Écrans annexes
-
-private struct OnboardingView: View {
-
-    let onRequest: () async -> Void
-    @State private var isRequesting = false
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Image(systemName: "photo.stack")
-                .font(.system(size: 64))
-                .foregroundStyle(.tint)
-
-            VStack(spacing: 10) {
-                Text("Vos souvenirs, chaque jour")
-                    .font(.title2.weight(.bold))
-                    .multilineTextAlignment(.center)
-                Text("FlashTime retrouve les photos prises le même jour les années passées et les affiche dans un widget sur votre écran d'accueil.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+    private var onboarding: some View {
+        FTMessageScreen(
+            symbol: "photo.on.rectangle.angled",
+            title: "Vos souvenirs,\nchaque jour",
+            message: "FlashTime retrouve les photos prises le même jour les années passées et les affiche dans un widget sur votre écran d'accueil. Elles ne quittent jamais votre appareil."
+        ) {
+            Button("Autoriser l'accès aux photos") {
+                Task { await viewModel.requestAccess() }
             }
-            .padding(.horizontal, 32)
-
-            Spacer()
-
-            Button {
-                isRequesting = true
-                Task {
-                    await onRequest()
-                    isRequesting = false
-                }
-            } label: {
-                Text("Autoriser l'accès aux photos")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(isRequesting)
-            .padding(.horizontal, 24)
-
-            Text("Les photos ne quittent jamais votre appareil.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 24)
+            .buttonStyle(.ftOutlineProminent)
         }
     }
-}
 
-private struct AccessDeniedView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "lock.circle")
-                .font(.system(size: 56))
-                .foregroundStyle(.secondary)
-            Text("Accès aux photos refusé")
-                .font(.title3.weight(.semibold))
-            Text("FlashTime a besoin d'accéder à votre photothèque pour retrouver vos souvenirs. Vous pouvez l'autoriser dans Réglages.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Button("Ouvrir les Réglages") {
+    private var accessDenied: some View {
+        FTMessageScreen(
+            symbol: "lock",
+            title: "Accès refusé",
+            message: "FlashTime a besoin de lire les dates de vos photos pour retrouver vos souvenirs. L'autorisation se règle dans les réglages du système."
+        ) {
+            Button("Ouvrir les réglages") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             }
-            .buttonStyle(.bordered)
-        }
-    }
-}
-
-private struct EmptyMemoriesView: View {
-
-    let dateLabel: String
-
-    var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "calendar.badge.exclamationmark")
-                .font(.system(size: 52))
-                .foregroundStyle(.secondary)
-            Text("Aucun souvenir pour le \(dateLabel)")
-                .font(.title3.weight(.semibold))
-                .multilineTextAlignment(.center)
-            Text("Aucune photo de votre photothèque n'a été prise un \(dateLabel) d'une année précédente. Revenez demain.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            .buttonStyle(.ftOutline)
         }
     }
 }
 
 #Preview {
     ContentView()
+        .preferredColorScheme(.dark)
 }

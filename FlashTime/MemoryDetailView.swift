@@ -5,7 +5,6 @@
 
 import SwiftUI
 import UIKit
-import Photos
 
 /// Affichage plein écran d'un souvenir, avec le titre « Il y a X ans ».
 struct MemoryDetailView: View {
@@ -14,6 +13,7 @@ struct MemoryDetailView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var image: UIImage?
+    @State private var revealed = false
 
     var body: some View {
         ZStack {
@@ -24,39 +24,35 @@ struct MemoryDetailView: View {
                     .resizable()
                     .scaledToFit()
                     .ignoresSafeArea()
-            } else {
-                ProgressView()
+                    .opacity(revealed ? 1 : 0)
             }
 
-            VStack {
+            VStack(spacing: 0) {
                 HStack {
                     Spacer()
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.headline)
-                            .padding(10)
-                            .background(.ultraThinMaterial, in: Circle())
+                            .font(.system(size: 15, weight: .light))
+                            .foregroundStyle(FT.Palette.textPrimary)
+                            .frame(width: 40, height: 40)
+                            .background(.black.opacity(0.25))
+                            .overlay {
+                                Rectangle()
+                                    .stroke(FT.Palette.textPrimary.opacity(0.35),
+                                            lineWidth: FT.Metric.hairline)
+                            }
                     }
-                    .tint(.white)
+                    .buttonStyle(.plain)
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
 
                 Spacer()
 
-                VStack(spacing: 4) {
-                    Text(memory.title)
-                        .font(.title2.weight(.bold))
-                    Text(memory.subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.75))
-                }
-                .foregroundStyle(.white)
-                .padding(.vertical, 14)
-                .padding(.horizontal, 24)
-                .background(.ultraThinMaterial, in: Capsule())
-                .padding(.bottom, 40)
+                caption
+                    .padding(.bottom, 44)
             }
         }
         .task {
@@ -66,10 +62,31 @@ struct MemoryDetailView: View {
             let data = await MemoriesFetcher.imageData(
                 for: memory.id,
                 targetSize: target,
-                contentMode: .aspectFit,
+                cropping: .fit,
                 compression: 0.9
             )
             if let data { image = UIImage(data: data) }
+            withAnimation(.easeOut(duration: 0.35)) { revealed = true }
+        }
+    }
+
+    private var caption: some View {
+        VStack(spacing: 5) {
+            Text(memory.title)
+                .font(FT.Typography.screenTitle(16))
+                .tracking(FT.Metric.titleTracking)
+                .foregroundStyle(FT.Palette.textPrimary)
+
+            Text(memory.subtitle)
+                .font(FT.Typography.body(12))
+                .foregroundStyle(FT.Palette.textPrimary.opacity(0.6))
+        }
+        .padding(.vertical, 14)
+        .padding(.horizontal, 34)
+        .background(.black.opacity(0.35))
+        .overlay {
+            Rectangle()
+                .stroke(FT.Palette.textPrimary.opacity(0.25), lineWidth: FT.Metric.hairline)
         }
     }
 }

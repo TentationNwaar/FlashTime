@@ -29,19 +29,16 @@ struct MemoryWidgetView: View {
             memoryContent(memory)
         case .empty:
             message(
-                icon: "calendar",
                 title: "Pas de souvenir",
                 detail: "Aucune photo prise un tel jour les années passées."
             )
         case .noAccess:
             message(
-                icon: "lock",
                 title: "Accès requis",
                 detail: "Ouvrez FlashTime pour autoriser l'accès à vos photos."
             )
         case .placeholder:
             message(
-                icon: "photo.stack",
                 title: "FlashTime",
                 detail: "Vos souvenirs du jour."
             )
@@ -53,17 +50,18 @@ struct MemoryWidgetView: View {
             Spacer(minLength: 0)
 
             HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(memory.title)
                         .font(titleFont)
-                        .fontWeight(.bold)
+                        .tracking(titleTracking)
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
 
                     if family != .systemSmall {
                         Text(memory.subtitle)
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.8))
+                            .font(.system(size: 11))
+                            .tracking(0.4)
+                            .foregroundStyle(.white.opacity(0.72))
                             .lineLimit(1)
                     }
                 }
@@ -71,19 +69,26 @@ struct MemoryWidgetView: View {
                 if family != .systemSmall, entry.total > 1 {
                     Spacer(minLength: 8)
                     Text("\(entry.index)/\(entry.total)")
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.white.opacity(0.7))
+                        .font(.system(size: 10).monospacedDigit())
+                        .tracking(1)
+                        .foregroundStyle(.white.opacity(0.55))
                 }
             }
             .foregroundStyle(.white)
-            .shadow(color: .black.opacity(0.5), radius: 4, y: 1)
+            .shadow(color: .black.opacity(0.55), radius: 5, y: 1)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, family == .systemSmall ? 12 : 16)
-            .padding(.bottom, family == .systemSmall ? 12 : 16)
-            .padding(.top, 40)
+            .padding(.horizontal, family == .systemSmall ? 13 : 17)
+            .padding(.bottom, family == .systemSmall ? 13 : 16)
+            .padding(.top, 48)
             .background(
+                // Dégradé long et discret : la photo prime, le texte reste
+                // lisible sans assombrir la moitié du widget.
                 LinearGradient(
-                    colors: [.black.opacity(0), .black.opacity(0.55)],
+                    stops: [
+                        .init(color: .black.opacity(0), location: 0),
+                        .init(color: .black.opacity(0.18), location: 0.45),
+                        .init(color: .black.opacity(0.62), location: 1)
+                    ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -91,25 +96,30 @@ struct MemoryWidgetView: View {
         }
     }
 
-    private func message(icon: String, title: String, detail: String) -> some View {
-        // Le fond est toujours sombre dans ces états : on force le blanc plutôt
-        // que de dépendre du mode clair/sombre du système.
-        VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(.white.opacity(0.7))
+    private func message(title: String, detail: String) -> some View {
+        VStack(spacing: 8) {
             Text(title)
-                .font(.headline)
-                .foregroundStyle(.white)
+                .font(FT.Typography.sectionLabel(family == .systemSmall ? 12 : 13))
+                .tracking(FT.Metric.labelTracking)
+                .foregroundStyle(FT.Palette.textPrimary)
+                .multilineTextAlignment(.center)
+
             if family != .systemSmall {
                 Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .font(.system(size: 11))
+                    .foregroundStyle(FT.Palette.textSecondary)
                     .multilineTextAlignment(.center)
+                    .lineSpacing(2)
             }
         }
-        .padding(12)
+        .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .center) {
+            // Filet fin autour du message, écho des encadrés de l'app.
+            Rectangle()
+                .stroke(FT.Palette.separator, lineWidth: FT.Metric.hairline)
+                .padding(family == .systemSmall ? 12 : 16)
+        }
     }
 
     // MARK: - Fond
@@ -121,20 +131,23 @@ struct MemoryWidgetView: View {
                 .resizable()
                 .scaledToFill()
         } else {
-            LinearGradient(
-                colors: [Color(white: 0.16), Color(white: 0.08)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            FT.Palette.background
         }
     }
 
+    // MARK: - Typographie
+
+    /// Serif en petites capitales : « IL Y A 10 ANS ».
     private var titleFont: Font {
         switch family {
-        case .systemSmall: return .headline
-        case .systemMedium: return .title3
-        default: return .title2
+        case .systemSmall: return FT.Typography.screenTitle(13)
+        case .systemMedium: return FT.Typography.screenTitle(16)
+        default: return FT.Typography.screenTitle(19)
         }
+    }
+
+    private var titleTracking: CGFloat {
+        family == .systemSmall ? 2.4 : FT.Metric.titleTracking
     }
 }
 

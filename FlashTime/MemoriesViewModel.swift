@@ -5,7 +5,6 @@
 
 import Combine   // requis explicitement : le projet active MEMBER_IMPORT_VISIBILITY
 import Foundation
-import Photos
 import SwiftUI
 import WidgetKit
 

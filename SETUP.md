@@ -13,11 +13,12 @@ FlashTime/                     ← target app (fichiers auto-inclus)
   MemoryThumbnail.swift
   MemoryDetailView.swift
   SettingsView.swift
-Shared/                        ← à ajouter aux DEUX targets
+Shared/                        ← compilé par les DEUX targets
   AppGroup.swift
   MemoryPhoto.swift
   PhotoAccess.swift
   MemoriesFetcher.swift
+  Theme.swift                  ← direction artistique (palette, typo, composants)
 FlashTimeWidgetSources/        ← à déplacer dans la target widget
   FlashTimeWidgetBundle.swift
   FlashTimeWidget.swift
@@ -121,6 +122,28 @@ est déduit de l'heure courante pour que le cycle continue d'une reconstruction
 **Titre affiché**
 `MemoryPhoto.title` → « Il y a 10 ans », avec la date complète sous-titrée sur
 les tailles moyennes et grandes.
+
+## Direction artistique
+
+Tout est centralisé dans `Shared/Theme.swift`.
+
+**Palette** — anthracite neutre (`#262626`) plutôt que noir pur, bandeaux en
+`#343434`, filets en `#454545`, texte en blanc légèrement chaud (`#F2F0EC`).
+Le bleu de l'icône (`#0770FE`) n'apparaît que sur les éléments actifs : bouton
+principal, action « Enregistrer », interrupteurs. Les photos sont la seule autre
+source de couleur.
+
+**Typographie** — serif système (New York) en petites capitales très espacées
+pour les titres, sections et boutons ; sans-serif pour les paragraphes, qui
+restent plus lisibles ainsi. L'interlettrage est la signature visuelle : 4 pt
+sur les titres, 2,6 pt sur les libellés.
+
+**Formes** — aucun arrondi hors du logo. Boutons encadrés d'un filet d'1 pt sans
+remplissage, qui s'inverse à l'appui. Grille de vignettes espacée de 2 pt, façon
+planche contact.
+
+Pour ajuster l'ensemble, il suffit de modifier `FT.Palette`, `FT.Typography` et
+`FT.Metric` : app et widget suivent.
 
 ## Limites connues
 

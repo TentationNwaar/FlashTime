@@ -3,7 +3,7 @@
 //  FlashTime — code partagé entre l'app et le widget
 //
 
-import Photos
+internal import Photos
 
 /// État simplifié de l'autorisation d'accès à la photothèque.
 nonisolated enum PhotoAccessState: Sendable {

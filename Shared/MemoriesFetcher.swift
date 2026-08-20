@@ -6,7 +6,7 @@
 //  jour/mois qu'aujourd'hui, les années précédentes.
 //
 
-import Photos
+internal import Photos
 import UIKit
 
 nonisolated enum MemoriesFetcher {
@@ -95,6 +95,22 @@ nonisolated enum MemoriesFetcher {
 
     // MARK: - Chargement d'image
 
+    /// Cadrage demandé. Ce type maison évite d'exposer `PHImageContentMode` aux
+    /// couches d'interface, qui n'ont alors pas à importer PhotoKit.
+    enum Cropping {
+        /// Remplit la zone, quitte à rogner les bords.
+        case fill
+        /// Conserve la photo entière.
+        case fit
+
+        fileprivate var contentMode: PHImageContentMode {
+            switch self {
+            case .fill: return .aspectFill
+            case .fit: return .aspectFit
+            }
+        }
+    }
+
     /// Charge une image redimensionnée pour l'affichage, encodée en JPEG.
     ///
     /// On renvoie du `Data` plutôt qu'une `UIImage` : c'est ce qui transite dans
@@ -103,7 +119,7 @@ nonisolated enum MemoriesFetcher {
     static func imageData(
         for assetID: String,
         targetSize: CGSize,
-        contentMode: PHImageContentMode = .aspectFill,
+        cropping: Cropping = .fill,
         compression: CGFloat = 0.85
     ) async -> Data? {
 
@@ -112,7 +128,7 @@ nonisolated enum MemoriesFetcher {
         return await imageData(
             for: asset,
             targetSize: targetSize,
-            contentMode: contentMode,
+            cropping: cropping,
             compression: compression
         )
     }
@@ -120,7 +136,7 @@ nonisolated enum MemoriesFetcher {
     static func imageData(
         for asset: PHAsset,
         targetSize: CGSize,
-        contentMode: PHImageContentMode = .aspectFill,
+        cropping: Cropping = .fill,
         compression: CGFloat = 0.85
     ) async -> Data? {
 
@@ -135,7 +151,7 @@ nonisolated enum MemoriesFetcher {
             PHImageManager.default().requestImage(
                 for: asset,
                 targetSize: targetSize,
-                contentMode: contentMode,
+                contentMode: cropping.contentMode,
                 options: options
             ) { image, info in
                 // Le handler peut être appelé deux fois (version dégradée puis

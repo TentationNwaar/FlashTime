@@ -18,6 +18,8 @@
 		5080558130226A67007CDFD7 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557730226A67007CDFD7 /* AppGroup.swift */; };
 		5080558230226A67007CDFD7 /* PhotoAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557A30226A67007CDFD7 /* PhotoAccess.swift */; };
 		5080558330226A67007CDFD7 /* MemoriesFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5080557830226A67007CDFD7 /* MemoriesFetcher.swift */; };
+		FT01THEME0000000000000002 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT01THEME0000000000000001 /* Theme.swift */; };
+		FT01THEME0000000000000003 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT01THEME0000000000000001 /* Theme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,7 @@
 		5080557930226A67007CDFD7 /* MemoryPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryPhoto.swift; sourceTree = "<group>"; };
 		5080557A30226A67007CDFD7 /* PhotoAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAccess.swift; sourceTree = "<group>"; };
 		5080558530226AD3007CDFD7 /* FlashTimeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlashTimeWidgetExtension.entitlements; sourceTree = "<group>"; };
+		FT01THEME0000000000000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -183,6 +186,7 @@
 				5080557830226A67007CDFD7 /* MemoriesFetcher.swift */,
 				5080557930226A67007CDFD7 /* MemoryPhoto.swift */,
 				5080557A30226A67007CDFD7 /* PhotoAccess.swift */,
+				FT01THEME0000000000000001 /* Theme.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -368,6 +372,7 @@
 			files = (
 				5080557C30226A67007CDFD7 /* MemoryPhoto.swift in Sources */,
 				5080557D30226A67007CDFD7 /* AppGroup.swift in Sources */,
+				FT01THEME0000000000000002 /* Theme.swift in Sources */,
 				5080557E30226A67007CDFD7 /* PhotoAccess.swift in Sources */,
 				5080557F30226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
 			);
@@ -393,6 +398,7 @@
 			files = (
 				5080558030226A67007CDFD7 /* MemoryPhoto.swift in Sources */,
 				5080558130226A67007CDFD7 /* AppGroup.swift in Sources */,
+				FT01THEME0000000000000003 /* Theme.swift in Sources */,
 				5080558230226A67007CDFD7 /* PhotoAccess.swift in Sources */,
 				5080558330226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
 			);
@@ -555,6 +561,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_UIColorName = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -589,6 +596,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_UIColorName = LaunchBackground;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

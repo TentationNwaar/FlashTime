@@ -38,7 +38,7 @@ struct MemoryThumbnail: View {
     var body: some View {
         ZStack {
             Rectangle()
-                .fill(Color.secondary.opacity(0.15))
+                .fill(FT.Palette.elevated)
 
             if let image {
                 Image(uiImage: image)

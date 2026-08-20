@@ -9,7 +9,6 @@
 //  d'environ 30 Mo imposée aux extensions WidgetKit.
 //
 
-import Photos
 import SwiftUI
 import WidgetKit
 
@@ -116,7 +115,7 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
             let data = await MemoriesFetcher.imageData(
                 for: memory.id,
                 targetSize: target,
-                contentMode: .aspectFill,
+                cropping: .fill,
                 compression: 0.8
             )
             entries.append(

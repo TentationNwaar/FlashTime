@@ -16,6 +16,13 @@ final class MemoriesViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published var settings: MemorySettings = .load()
 
+    /// Photos écartées du widget. L'app continue de les afficher, grisées.
+    @Published private(set) var hidden: Set<String> = HiddenPhotos.identifiers
+
+    /// Mode sélection multiple, activé par un appui long sur une vignette.
+    @Published var isSelecting = false
+    @Published var selection: Set<String> = []
+
     /// Souvenirs regroupés par ancienneté, du plus ancien au plus récent.
     var groupedByYearsAgo: [(yearsAgo: Int, photos: [MemoryPhoto])] {
         Dictionary(grouping: memories, by: \.yearsAgo)
@@ -63,5 +70,68 @@ final class MemoriesViewModel: ObservableObject {
         settings = new
         new.save()
         await reload()
+    }
+
+    // MARK: - Photos masquées
+
+    var visibleCount: Int {
+        memories.count - memories.filter { hidden.contains($0.id) }.count
+    }
+
+    func isHidden(_ memory: MemoryPhoto) -> Bool {
+        hidden.contains(memory.id)
+    }
+
+    /// Relit le stockage partagé : les réglages peuvent l'avoir vidé.
+    func refreshHidden() {
+        hidden = HiddenPhotos.identifiers
+    }
+
+    func setHidden(_ shouldHide: Bool, for ids: Set<String>) {
+        guard !ids.isEmpty else { return }
+        HiddenPhotos.setHidden(shouldHide, for: ids)
+        hidden = HiddenPhotos.identifiers
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    func toggleHidden(_ memory: MemoryPhoto) {
+        setHidden(!isHidden(memory), for: [memory.id])
+    }
+
+    func showAll() {
+        HiddenPhotos.clear()
+        hidden = []
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    // MARK: - Sélection
+
+    /// Vrai si toutes les photos sélectionnées sont déjà masquées : l'action
+    /// proposée devient alors « réafficher ».
+    var selectionIsFullyHidden: Bool {
+        !selection.isEmpty && selection.allSatisfy { hidden.contains($0) }
+    }
+
+    func beginSelection(with memory: MemoryPhoto) {
+        isSelecting = true
+        selection = [memory.id]
+    }
+
+    func toggleSelection(_ memory: MemoryPhoto) {
+        if selection.contains(memory.id) {
+            selection.remove(memory.id)
+        } else {
+            selection.insert(memory.id)
+        }
+    }
+
+    func endSelection() {
+        isSelecting = false
+        selection = []
+    }
+
+    func applySelection() {
+        setHidden(!selectionIsFullyHidden, for: selection)
+        endSelection()
     }
 }

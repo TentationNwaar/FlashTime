@@ -55,87 +55,136 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
         let target = targetSize(for: context)
         let fallback = placeholder(in: context)
         Task {
-            let entries = await buildEntries(target: target, limit: 1)
-            completion(entries.first ?? fallback)
+            let plan = await buildTimeline(target: target, limit: 1, includeTomorrow: false)
+            completion(plan.entries.first ?? fallback)
         }
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<MemoryEntry>) -> Void) {
         let target = targetSize(for: context)
         Task {
-            let entries = await buildEntries(target: target, limit: entriesPerTimeline)
-            let lastDate = entries.last?.date ?? Date()
-            let lastState = entries.last?.state ?? .placeholder
-            let reloadDate: Date
-
-            switch lastState {
-            case .empty:
-                // Rien à montrer aujourd'hui : inutile de consommer le budget de
-                // rafraîchissement avant minuit.
-                reloadDate = nextMidnight(after: lastDate)
-            case .noAccess:
-                reloadDate = lastDate.addingTimeInterval(3600)
-            case .memory, .placeholder:
-                reloadDate = nextReloadDate(after: lastDate)
-            }
-
-            completion(Timeline(entries: entries, policy: .after(reloadDate)))
+            let plan = await buildTimeline(target: target, limit: entriesPerTimeline)
+            completion(Timeline(entries: plan.entries, policy: .after(plan.reloadDate)))
         }
     }
 
     // MARK: Construction
 
-    private func buildEntries(target: CGSize, limit: Int) async -> [MemoryEntry] {
+    private struct TimelinePlan {
+        let entries: [MemoryEntry]
+        let reloadDate: Date
+    }
+
+    private func buildTimeline(
+        target: CGSize,
+        limit: Int,
+        includeTomorrow: Bool = true
+    ) async -> TimelinePlan {
 
         let now = Date()
+        let calendar = Calendar.current
+        let midnight = calendar.startOfDay(for: now.addingTimeInterval(86_400))
 
         guard PhotoAccess.current.canReadLibrary else {
-            return [MemoryEntry(date: now, state: .noAccess, imageData: nil, index: 0, total: 0)]
+            return TimelinePlan(
+                entries: [MemoryEntry(date: now, state: .noAccess, imageData: nil, index: 0, total: 0)],
+                reloadDate: now.addingTimeInterval(3600)
+            )
         }
-
-        let memories = orderedMemories(for: now)
-        guard !memories.isEmpty else {
-            return [MemoryEntry(date: now, state: .empty, imageData: nil, index: 0, total: 0)]
-        }
-
-        // Décalage courant dans le cycle, pour que la rotation continue d'une
-        // reconstruction de timeline à la suivante au lieu de repartir de zéro.
-        let calendar = Calendar.current
-        let elapsed = now.timeIntervalSince(calendar.startOfDay(for: now))
-        let offset = Int(elapsed / rotationInterval) % memories.count
-
-        let count = min(limit, memories.count)
 
         var entries: [MemoryEntry] = []
-        entries.reserveCapacity(count)
+        // Par défaut : reconstruction juste après le changement de date.
+        var reloadDate = midnight.addingTimeInterval(120)
 
-        for step in 0..<count {
-            let position = (offset + step) % memories.count
-            let memory = memories[position]
-            let data = await MemoriesFetcher.imageData(
-                for: memory.id,
-                targetSize: target,
-                cropping: .fill,
-                compression: 0.8
-            )
-            entries.append(
-                MemoryEntry(
-                    date: now.addingTimeInterval(Double(step) * rotationInterval),
-                    state: .memory(memory),
-                    imageData: data,
-                    index: position + 1,
-                    total: memories.count
+        // MARK: Journée en cours
+        let memories = orderedMemories(for: now)
+
+        if memories.isEmpty {
+            entries.append(MemoryEntry(date: now, state: .empty, imageData: nil, index: 0, total: 0))
+        } else {
+            // Décalage courant dans le cycle, pour que la rotation continue d'une
+            // reconstruction de timeline à la suivante au lieu de repartir de zéro.
+            let elapsed = now.timeIntervalSince(calendar.startOfDay(for: now))
+            let offset = Int(elapsed / rotationInterval) % memories.count
+            let count = min(limit, memories.count)
+
+            for step in 0..<count {
+                let date = now.addingTimeInterval(Double(step) * rotationInterval)
+                // Aucune entrée ne franchit minuit : au-delà, les souvenirs et
+                // leur libellé « il y a X ans » ne sont plus valables.
+                guard step == 0 || date < midnight else { break }
+
+                let position = (offset + step) % memories.count
+                let memory = memories[position]
+                let data = await MemoriesFetcher.imageData(
+                    for: memory.id,
+                    targetSize: target,
+                    cropping: .fill,
+                    compression: 0.8
                 )
+                entries.append(
+                    MemoryEntry(
+                        date: date,
+                        state: .memory(memory),
+                        imageData: data,
+                        index: position + 1,
+                        total: memories.count
+                    )
+                )
+            }
+
+            // Rechargement dès que la dernière entrée du jour a été servie, afin
+            // de poursuivre la rotation. Jamais au-delà du changement de date.
+            let lastDate = entries.last?.date ?? now
+            reloadDate = min(
+                lastDate.addingTimeInterval(rotationInterval),
+                midnight.addingTimeInterval(120)
             )
         }
 
-        return entries
+        // MARK: Bascule automatique du jour
+        //
+        // On planifie dès maintenant le premier souvenir de demain, daté de
+        // minuit. Le widget change donc de photo au changement de date même si
+        // iOS ne réveille pas l'extension à cet instant précis — ce qui est le
+        // cas ordinaire la nuit. Sans cette entrée, l'affichage resterait figé
+        // sur la veille jusqu'au prochain réveil du système.
+        if includeTomorrow {
+            let tomorrow = orderedMemories(for: midnight)
+
+            if let first = tomorrow.first {
+                let data = await MemoriesFetcher.imageData(
+                    for: first.id,
+                    targetSize: target,
+                    cropping: .fill,
+                    compression: 0.8
+                )
+                entries.append(
+                    MemoryEntry(
+                        date: midnight,
+                        state: .memory(first),
+                        imageData: data,
+                        index: 1,
+                        total: tomorrow.count
+                    )
+                )
+            } else {
+                entries.append(
+                    MemoryEntry(date: midnight, state: .empty, imageData: nil, index: 0, total: 0)
+                )
+            }
+        }
+
+        return TimelinePlan(entries: entries, reloadDate: reloadDate)
     }
 
     /// Souvenirs du jour, mélangés de façon déterministe : l'ordre est stable
-    /// toute la journée, mais différent d'un jour à l'autre.
+    /// toute la journée, mais différent d'un jour à l'autre. Les photos écartées
+    /// par l'utilisateur sont retirées ici.
     private func orderedMemories(for date: Date) -> [MemoryPhoto] {
+        let hidden = HiddenPhotos.identifiers
         let memories = MemoriesFetcher.todaysMemories(reference: date)
+            .filter { !hidden.contains($0.id) }
         guard memories.count > 1 else { return memories }
 
         let day = Calendar.current.startOfDay(for: date).timeIntervalSince1970
@@ -151,16 +200,6 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
             return CGSize(width: 600, height: 600)
         }
         return CGSize(width: display.width * scale, height: display.height * scale)
-    }
-
-    /// Recharge après la dernière entrée, sans jamais dépasser minuit :
-    /// à minuit, les souvenirs du jour changent.
-    private func nextReloadDate(after date: Date) -> Date {
-        min(date.addingTimeInterval(rotationInterval), nextMidnight(after: date))
-    }
-
-    private func nextMidnight(after date: Date) -> Date {
-        Calendar.current.startOfDay(for: date.addingTimeInterval(86_400))
     }
 }
 

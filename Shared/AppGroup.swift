@@ -26,6 +26,46 @@ nonisolated enum AppGroup {
     static let widgetKind = "FlashTimeWidget"
 }
 
+/// Photos que l'utilisateur a choisi d'écarter du widget.
+///
+/// Elles restent visibles dans l'app — pour pouvoir les réafficher — mais sont
+/// filtrées lors de la construction de la timeline. Le stockage est un simple
+/// tableau d'identifiants `PHAsset` dans les réglages partagés.
+nonisolated enum HiddenPhotos {
+
+    private static let key = "hiddenPhotoIdentifiers"
+
+    static var identifiers: Set<String> {
+        Set(AppGroup.defaults.stringArray(forKey: key) ?? [])
+    }
+
+    static func isHidden(_ id: String) -> Bool {
+        identifiers.contains(id)
+    }
+
+    static func setHidden(_ hidden: Bool, for ids: Set<String>) {
+        var current = identifiers
+        if hidden {
+            current.formUnion(ids)
+        } else {
+            current.subtract(ids)
+        }
+        save(current)
+    }
+
+    static func toggle(_ id: String) {
+        setHidden(!isHidden(id), for: [id])
+    }
+
+    static func clear() {
+        save([])
+    }
+
+    private static func save(_ ids: Set<String>) {
+        AppGroup.defaults.set(Array(ids), forKey: key)
+    }
+}
+
 /// Réglages utilisateur, lus par l'app et par le widget.
 nonisolated struct MemorySettings: Equatable, Sendable {
 

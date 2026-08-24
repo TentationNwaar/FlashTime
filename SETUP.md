@@ -112,6 +112,21 @@ n'est pas ouverte pendant des semaines. Une seule image est décodée à la fois
 à la taille exacte du widget, ce qui reste sous la limite mémoire d'environ
 30 Mo des extensions WidgetKit.
 
+**Changement de jour sans ouvrir l'app**
+Chaque timeline se termine par une entrée datée de minuit qui contient déjà le
+premier souvenir du lendemain, image comprise. Le widget bascule donc à la bonne
+date même si iOS ne réveille pas l'extension à cet instant — ce qui est le cas
+ordinaire pendant la nuit. Aucune entrée ne franchit minuit, sans quoi le
+libellé « il y a X ans » deviendrait faux. La reconstruction complète est
+programmée deux minutes après le changement de date.
+
+**Photos écartées**
+Un appui long sur une vignette propose de la masquer, ou d'entrer en sélection
+multiple. Les identifiants écartés sont stockés dans les réglages partagés
+(`HiddenPhotos`) et filtrés à la construction de la timeline. Les photos restent
+visibles dans l'app, assourdies et marquées d'un œil barré ; les réglages
+permettent de tout réafficher d'un coup.
+
 **Rotation des photos**
 Les souvenirs du jour sont mélangés avec un générateur pseudo-aléatoire dont la
 graine est la date : l'ordre est stable sur la journée, différent chaque jour.

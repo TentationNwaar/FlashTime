@@ -7,6 +7,7 @@ internal import Photos
 internal import PhotosUI   // presentLimitedLibraryPicker(from:) est déclaré ici, pas dans Photos
 import SwiftUI
 import UIKit
+import WidgetKit
 
 struct SettingsView: View {
 
@@ -14,6 +15,7 @@ struct SettingsView: View {
     let onSave: (MemorySettings) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @State private var hiddenCount = HiddenPhotos.identifiers.count
 
     private var accessState: PhotoAccessState { PhotoAccess.current }
 
@@ -63,6 +65,22 @@ struct SettingsView: View {
                             label: "Exclure les captures d'écran",
                             isOn: $settings.excludeScreenshots
                         )
+
+                        if hiddenCount > 0 {
+                            FTSectionBanner(title: "Photos masquées")
+
+                            footnote(hiddenCount == 1
+                                     ? "1 photo est écartée du widget. Elle reste visible dans l'app, grisée."
+                                     : "\(hiddenCount) photos sont écartées du widget. Elles restent visibles dans l'app, grisées.")
+
+                            Button("Tout réafficher") {
+                                HiddenPhotos.clear()
+                                hiddenCount = 0
+                                WidgetCenter.shared.reloadAllTimelines()
+                            }
+                            .buttonStyle(.ftOutline)
+                            .padding(.bottom, 28)
+                        }
 
                         if accessState == .limited {
                             FTSectionBanner(title: "Sélection")

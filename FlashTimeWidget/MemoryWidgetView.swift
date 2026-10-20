@@ -3,6 +3,7 @@
 //  FlashTimeWidget
 //
 
+import AppIntents   // Button(intent:) vient de la surcouche AppIntents + SwiftUI
 import SwiftUI
 import UIKit
 import WidgetKit
@@ -18,6 +19,17 @@ struct MemoryWidgetView: View {
             .containerBackground(for: .widget) {
                 background
             }
+            .widgetURL(link)
+    }
+
+    /// Toucher le widget ouvre l'app directement sur la photo affichée.
+    private var link: URL? {
+        guard case .memory(let memory) = entry.state else { return nil }
+        var components = URLComponents()
+        components.scheme = "flashtime"
+        components.host = "memory"
+        components.queryItems = [URLQueryItem(name: "id", value: memory.id)]
+        return components.url
     }
 
     // MARK: - Contenu
@@ -29,23 +41,62 @@ struct MemoryWidgetView: View {
             memoryContent(memory)
         case .empty:
             message(
-                title: "Pas de souvenir",
-                detail: "Aucune photo prise un tel jour les années passées."
+                title: L10n.widgetEmptyTitle,
+                detail: L10n.widgetEmptyDetail
             )
         case .noAccess:
             message(
-                title: "Accès requis",
-                detail: "Ouvrez FlashTime pour autoriser l'accès à vos photos."
+                title: L10n.widgetAccessTitle,
+                detail: L10n.widgetAccessDetail
             )
         case .placeholder:
             message(
-                title: "FlashTime",
-                detail: "Vos souvenirs du jour."
+                title: L10n.appName,
+                detail: L10n.widgetPlaceholderDetail
             )
         }
     }
 
     private func memoryContent(_ memory: MemoryPhoto) -> some View {
+        captionLayer(memory)
+            .overlay {
+                if entry.total > 1 {
+                    navigationArrows
+                }
+            }
+    }
+
+    /// Flèches latérales : souvenir précédent / suivant de la journée.
+    private var navigationArrows: some View {
+        HStack {
+            arrowButton("chevron.left", step: -1)
+            Spacer(minLength: 0)
+            arrowButton("chevron.right", step: 1)
+        }
+        .padding(.horizontal, family == .systemSmall ? 4 : 8)
+        // Les flèches restent au-dessus de la légende, centrées sur la photo.
+        .padding(.bottom, family == .systemSmall ? 22 : 30)
+    }
+
+    private func arrowButton(_ symbol: String, step: Int) -> some View {
+        let side: CGFloat = family == .systemSmall ? 26 : 32
+        return Button(intent: ShowAdjacentMemoryIntent(step: step)) {
+            Image(systemName: symbol)
+                .font(.system(size: family == .systemSmall ? 11 : 13, weight: .regular))
+                .foregroundStyle(.white)
+                .frame(width: side, height: side)
+                .background(.black.opacity(0.28))
+                .overlay {
+                    Rectangle()
+                        .stroke(.white.opacity(0.35), lineWidth: FT.Metric.hairline)
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(step < 0 ? L10n.previousMemory : L10n.nextMemory)
+    }
+
+    private func captionLayer(_ memory: MemoryPhoto) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer(minLength: 0)
 

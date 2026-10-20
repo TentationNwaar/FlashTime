@@ -14,7 +14,18 @@ final class MemoriesViewModel: ObservableObject {
     @Published private(set) var accessState: PhotoAccessState = PhotoAccess.current
     @Published private(set) var memories: [MemoryPhoto] = []
     @Published private(set) var isLoading = false
+    /// Vrai dès que la première recherche est terminée : évite d'afficher
+    /// « aucun souvenir » pendant une fraction de seconde au démarrage.
+    @Published private(set) var hasLoaded = false
     @Published var settings: MemorySettings = .load()
+
+    /// Jour consulté. Par défaut aujourd'hui ; les flèches permettent d'en
+    /// parcourir d'autres. Le widget, lui, reste toujours sur aujourd'hui.
+    @Published private(set) var referenceDate = Date()
+
+    /// Recherche du jour le plus proche contenant des souvenirs.
+    @Published private(set) var isSearchingNearest = false
+    @Published private(set) var nearestSearchFailed = false
 
     /// Photos écartées du widget. L'app continue de les afficher, grisées.
     @Published private(set) var hidden: Set<String> = HiddenPhotos.identifiers
@@ -23,6 +34,12 @@ final class MemoriesViewModel: ObservableObject {
     @Published var isSelecting = false
     @Published var selection: Set<String> = []
 
+    /// Identifiant de la dernière recherche lancée : une réponse plus ancienne,
+    /// arrivée après un changement de jour rapide, est ignorée.
+    private var loadToken = UUID()
+
+    // MARK: - Données dérivées
+
     /// Souvenirs regroupés par ancienneté, du plus ancien au plus récent.
     var groupedByYearsAgo: [(yearsAgo: Int, photos: [MemoryPhoto])] {
         Dictionary(grouping: memories, by: \.yearsAgo)
@@ -30,10 +47,27 @@ final class MemoriesViewModel: ObservableObject {
             .sorted { $0.yearsAgo > $1.yearsAgo }
     }
 
-    var todayLabel: String {
-        Date().formatted(
-            .dateTime.day().month(.wide).locale(Locale(identifier: "fr_FR"))
-        )
+    /// Ordre d'affichage à plat, identique à celui de la grille : sert au
+    /// défilement horizontal de la vue plein écran.
+    var orderedMemories: [MemoryPhoto] {
+        groupedByYearsAgo.flatMap(\.photos)
+    }
+
+    /// Première vignette de la grille, cible des bulles d'aide.
+    var firstMemoryID: String? {
+        orderedMemories.first?.id
+    }
+
+    var isToday: Bool {
+        Calendar.current.isDateInToday(referenceDate)
+    }
+
+    var dayLabel: String {
+        L10n.dayMonth(referenceDate)
+    }
+
+    var navigatorLabel: String {
+        L10n.navigatorDate(referenceDate)
     }
 
     // MARK: - Autorisation
@@ -54,15 +88,37 @@ final class MemoriesViewModel: ObservableObject {
     func reload() async {
         guard accessState.canReadLibrary else {
             memories = []
+            hasLoaded = true
             return
         }
+
+        let token = UUID()
+        loadToken = token
         isLoading = true
-        // La requête ne lit que des métadonnées PhotoKit : assez rapide pour
-        // rester sur le MainActor, ce qui évite tout franchissement d'acteur
-        // (le projet est configuré avec l'isolation MainActor par défaut).
-        memories = MemoriesFetcher.todaysMemories(settings: settings)
+
+        let settings = self.settings
+        let reference = referenceDate
+        // La requête PhotoKit s'exécute hors du thread principal : sur une
+        // grande photothèque, elle ne doit pas figer l'interface.
+        let result = await Task.detached(priority: .userInitiated) {
+            MemoriesFetcher.todaysMemories(reference: reference, settings: settings)
+        }.value
+
+        guard token == loadToken else { return }
+        memories = result
         isLoading = false
+        hasLoaded = true
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// Appelé au retour au premier plan : si l'utilisateur consultait
+    /// « aujourd'hui » et que la date a changé entre-temps, on suit.
+    func refreshIfDayChanged() async {
+        if !Calendar.current.isDateInToday(referenceDate),
+           Calendar.current.isDate(referenceDate, inSameDayAs: Date().addingTimeInterval(-86_400)) {
+            referenceDate = Date()
+        }
+        await reload()
     }
 
     func applySettings(_ new: MemorySettings) async {
@@ -72,11 +128,45 @@ final class MemoriesViewModel: ObservableObject {
         await reload()
     }
 
-    // MARK: - Photos masquées
+    // MARK: - Navigation entre les jours
 
-    var visibleCount: Int {
-        memories.count - memories.filter { hidden.contains($0.id) }.count
+    func showDay(_ date: Date) {
+        referenceDate = date
+        nearestSearchFailed = false
+        endSelection()
+        Task { await reload() }
     }
+
+    func moveDay(by offset: Int) {
+        guard let date = Calendar.current.date(byAdding: .day, value: offset, to: referenceDate) else { return }
+        showDay(date)
+    }
+
+    func showToday() {
+        showDay(Date())
+    }
+
+    /// Saute au jour le plus proche qui contient des souvenirs.
+    func showNearestMemories() async {
+        guard !isSearchingNearest else { return }
+        isSearchingNearest = true
+        nearestSearchFailed = false
+
+        let settings = self.settings
+        let reference = referenceDate
+        let found = await Task.detached(priority: .userInitiated) {
+            MemoriesFetcher.nearestDayWithMemories(from: reference, settings: settings)
+        }.value
+
+        isSearchingNearest = false
+        if let found {
+            showDay(found)
+        } else {
+            nearestSearchFailed = true
+        }
+    }
+
+    // MARK: - Photos masquées
 
     func isHidden(_ memory: MemoryPhoto) -> Bool {
         hidden.contains(memory.id)
@@ -96,12 +186,6 @@ final class MemoriesViewModel: ObservableObject {
 
     func toggleHidden(_ memory: MemoryPhoto) {
         setHidden(!isHidden(memory), for: [memory.id])
-    }
-
-    func showAll() {
-        HiddenPhotos.clear()
-        hidden = []
-        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Sélection
@@ -125,6 +209,10 @@ final class MemoriesViewModel: ObservableObject {
         }
     }
 
+    func selectAll() {
+        selection = Set(memories.map(\.id))
+    }
+
     func endSelection() {
         isSelecting = false
         selection = []
@@ -133,5 +221,18 @@ final class MemoriesViewModel: ObservableObject {
     func applySelection() {
         setHidden(!selectionIsFullyHidden, for: selection)
         endSelection()
+    }
+
+    // MARK: - Lien depuis le widget
+
+    /// Retrouve un souvenir d'aujourd'hui à partir de son identifiant, en
+    /// revenant d'abord sur la date du jour si nécessaire.
+    func memoryForWidgetLink(id: String) async -> MemoryPhoto? {
+        if !isToday || !hasLoaded {
+            referenceDate = Date()
+            endSelection()
+            await reload()
+        }
+        return memories.first { $0.id == id }
     }
 }

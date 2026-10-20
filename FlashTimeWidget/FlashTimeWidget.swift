@@ -105,7 +105,12 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
             // Décalage courant dans le cycle, pour que la rotation continue d'une
             // reconstruction de timeline à la suivante au lieu de repartir de zéro.
             let elapsed = now.timeIntervalSince(calendar.startOfDay(for: now))
-            let offset = Int(elapsed / rotationInterval) % memories.count
+            // Le décalage choisi avec les flèches du widget s'ajoute à la
+            // rotation automatique.
+            let offset = WidgetNavigation.wrap(
+                Int(elapsed / rotationInterval) + WidgetNavigation.offset(for: now),
+                count: memories.count
+            )
             let count = min(limit, memories.count)
 
             for step in 0..<count {
@@ -211,8 +216,8 @@ struct FlashTimeWidget: Widget {
         StaticConfiguration(kind: AppGroup.widgetKind, provider: MemoryTimelineProvider()) { entry in
             MemoryWidgetView(entry: entry)
         }
-        .configurationDisplayName("Souvenirs")
-        .description("Les photos prises le même jour, les années passées.")
+        .configurationDisplayName(L10n.widgetName)
+        .description(L10n.widgetDescription)
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
         .contentMarginsDisabled()
     }

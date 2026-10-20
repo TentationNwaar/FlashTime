@@ -5,16 +5,37 @@
 //  Created by Maxence Weyermann on 04.08.2026.
 //
 
+import StoreKit
 import SwiftUI
 import UIKit
+
+/// Demande d'ouverture de la vue plein écran.
+private struct ViewerRequest: Identifiable {
+    /// Souvenir affiché en premier.
+    let id: String
+    let memories: [MemoryPhoto]
+}
 
 struct ContentView: View {
 
     @StateObject private var viewModel = MemoriesViewModel()
+    @StateObject private var coach = CoachMarks()
+    @ObservedObject private var languageStore = LanguageStore.shared
+
     @Environment(\.scenePhase) private var scenePhase
-    @State private var showSettings = false
-    @State private var selected: MemoryPhoto?
+    @Environment(\.requestReview) private var requestReview
+
+    /// Tutoriel d'accueil terminé. Remis à faux pour le rejouer.
+    @AppStorage("onboarding.completed") private var introCompleted = false
+    @State private var introIncludesLanguage = true
+
     @State private var showLaunch = true
+    @State private var showSettings = false
+    @State private var showDatePicker = false
+    @State private var replayAfterSettings = false
+    @State private var viewer: ViewerRequest?
+    /// Les bulles n'apparaissent qu'une fois l'écran stabilisé.
+    @State private var coachReady = false
 
     /// Durée minimale d'affichage du logo, pour que le fondu ne soit pas coupé
     /// net quand la recherche des souvenirs est immédiate.
@@ -30,6 +51,7 @@ struct ContentView: View {
                     .zIndex(1)
             }
         }
+        .environment(\.locale, languageStore.language.locale)
         .task {
             viewModel.refreshAccessState()
 
@@ -44,23 +66,46 @@ struct ContentView: View {
             withAnimation(.easeInOut(duration: 0.5)) {
                 showLaunch = false
             }
+            registerUsageDay()
+            try? await Task.sleep(for: .seconds(0.6))
+            coachReady = true
         }
-        .sheet(isPresented: $showSettings, onDismiss: { viewModel.refreshHidden() }) {
-            SettingsView(settings: viewModel.settings) { new in
-                Task { await viewModel.applySettings(new) }
-            }
+        .sheet(isPresented: $showSettings, onDismiss: settingsDismissed) {
+            SettingsView(
+                settings: viewModel.settings,
+                onSave: { new in
+                    Task { await viewModel.applySettings(new) }
+                },
+                onReplayTutorial: {
+                    replayAfterSettings = true
+                    showSettings = false
+                }
+            )
+            .environment(\.locale, languageStore.language.locale)
         }
-        .fullScreenCover(item: $selected) { memory in
-            MemoryDetailView(memory: memory)
+        .sheet(isPresented: $showDatePicker) {
+            datePickerSheet
+        }
+        .fullScreenCover(item: $viewer) { request in
+            MemoryDetailView(
+                memories: request.memories,
+                startID: request.id,
+                isHidden: { viewModel.isHidden($0) },
+                onToggleHidden: { viewModel.toggleHidden($0) }
+            )
         }
         .onChange(of: scenePhase) { _, phase in
-            // L'utilisateur a pu modifier l'autorisation dans Réglages.
-            // La garde évite un second chargement pendant l'écran de démarrage,
-            // qui effectue déjà le premier.
+            // L'utilisateur a pu modifier l'autorisation dans Réglages, ou la
+            // date a pu changer. La garde évite un second chargement pendant
+            // l'écran de démarrage, qui effectue déjà le premier.
             if phase == .active, !showLaunch {
                 viewModel.refreshAccessState()
-                Task { await viewModel.reload() }
+                Task { await viewModel.refreshIfDayChanged() }
+                registerUsageDay()
             }
+        }
+        .onOpenURL { url in
+            openFromWidget(url)
         }
     }
 
@@ -70,26 +115,78 @@ struct ContentView: View {
         ZStack {
             FT.Palette.background.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                topBar
-
-                switch viewModel.accessState {
-                case .notDetermined:
-                    onboarding
-                case .denied:
-                    accessDenied
-                case .authorized, .limited:
-                    memoriesList
+            if !introCompleted {
+                OnboardingView(includesLanguage: introIncludesLanguage) {
+                    finishIntro()
                 }
-            }
-        }
-        .overlay(alignment: .bottom) {
-            if viewModel.isSelecting {
-                selectionBar
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                .transition(.opacity)
+            } else {
+                VStack(spacing: 0) {
+                    topBar
+
+                    switch viewModel.accessState {
+                    case .notDetermined:
+                        accessRequest
+                    case .denied:
+                        accessDenied
+                    case .authorized, .limited:
+                        dayNavigator
+                        memoriesList
+                    }
+                }
+                .overlay(alignment: .bottom) {
+                    if viewModel.isSelecting {
+                        selectionBar
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+                .transition(.opacity)
             }
         }
         .animation(.easeOut(duration: 0.2), value: viewModel.isSelecting)
+        .animation(.easeInOut(duration: 0.35), value: introCompleted)
+        .sensoryFeedback(.selection, trigger: viewModel.selection)
+        .sensoryFeedback(.impact(weight: .light), trigger: viewModel.hidden)
+        .overlayPreferenceValue(CoachAnchorKey.self) { anchors in
+            coachOverlay(anchors)
+        }
+    }
+
+    // MARK: - Bulles d'aide
+
+    private var coachEnabled: Bool {
+        coachReady
+            && introCompleted
+            && !showLaunch
+            && viewModel.accessState.canReadLibrary
+            && viewModel.hasLoaded
+            && !viewModel.isLoading
+            && !viewModel.isSelecting
+            && !showSettings
+            && !showDatePicker
+            && viewer == nil
+    }
+
+    @ViewBuilder
+    private func coachOverlay(_ anchors: [CoachTarget: Anchor<CGRect>]) -> some View {
+        let pending = coachEnabled ? coach.pending(available: Set(anchors.keys)) : []
+
+        if let step = pending.first {
+            CoachMarkOverlay(
+                step: step,
+                anchor: step.target.flatMap { anchors[$0] },
+                index: coach.seen.count + 1,
+                total: coach.seen.count + pending.count,
+                onNext: {
+                    withAnimation(.easeOut(duration: 0.2)) { coach.markSeen(step) }
+                },
+                onSkip: {
+                    withAnimation(.easeOut(duration: 0.2)) { coach.skipAll() }
+                }
+            )
+            .id(step)
+            .transition(.opacity)
+        }
     }
 
     // MARK: - Barres
@@ -98,16 +195,22 @@ struct ContentView: View {
     private var topBar: some View {
         if viewModel.isSelecting {
             FTTopBar(title: selectionTitle) {
-                FTBarButton(title: "Tout") {
-                    viewModel.selection = Set(viewModel.memories.map(\.id))
+                FTBarButton(title: L10n.selectAll) {
+                    viewModel.selectAll()
                 }
             } trailing: {
-                FTBarButton(title: "Terminé", prominent: true) {
+                FTBarButton(title: L10n.done, prominent: true) {
                     viewModel.endSelection()
                 }
             }
         } else {
-            FTTopBar(title: "FlashTime") {
+            FTTopBar(title: L10n.appName) {
+                if viewModel.accessState.canReadLibrary, !viewModel.isToday {
+                    FTBarButton(title: L10n.today) {
+                        viewModel.showToday()
+                    }
+                }
+            } trailing: {
                 if viewModel.accessState.canReadLibrary {
                     Button {
                         showSettings = true
@@ -115,19 +218,20 @@ struct ContentView: View {
                         Image(systemName: "slider.horizontal.3")
                             .font(.system(size: 15, weight: .light))
                             .foregroundStyle(FT.Palette.textSecondary)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .padding(.trailing, -12)
+                    .accessibilityLabel(L10n.settings)
+                    .coachTarget(.settingsButton)
                 }
             }
         }
     }
 
     private var selectionTitle: String {
-        switch viewModel.selection.count {
-        case 0: return "Sélection"
-        case 1: return "1 photo"
-        default: return "\(viewModel.selection.count) photos"
-        }
+        viewModel.selection.isEmpty ? L10n.selection : L10n.photosCount(viewModel.selection.count)
     }
 
     private var selectionBar: some View {
@@ -139,9 +243,7 @@ struct ContentView: View {
             Button {
                 viewModel.applySelection()
             } label: {
-                Text(viewModel.selectionIsFullyHidden
-                     ? "Afficher dans le widget"
-                     : "Masquer du widget")
+                Text(viewModel.selectionIsFullyHidden ? L10n.showInWidget : L10n.hideFromWidget)
             }
             .buttonStyle(.ftOutline)
             .disabled(viewModel.selection.isEmpty)
@@ -152,25 +254,122 @@ struct ContentView: View {
         .background(FT.Palette.background)
     }
 
+    // MARK: - Navigation entre les jours
+
+    private var dayNavigator: some View {
+        HStack(spacing: 0) {
+            navigatorArrow("chevron.left", label: L10n.previousDay) {
+                viewModel.moveDay(by: -1)
+            }
+
+            Button {
+                showDatePicker = true
+            } label: {
+                VStack(spacing: 2) {
+                    Text(viewModel.navigatorLabel)
+                        .ftSectionLabel()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    Text(navigatorSubtitle)
+                        .font(FT.Typography.body(11))
+                        .foregroundStyle(FT.Palette.textTertiary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(viewModel.navigatorLabel)
+            .accessibilityValue(navigatorSubtitle)
+            .accessibilityHint(L10n.chooseDate)
+
+            navigatorArrow("chevron.right", label: L10n.nextDay) {
+                viewModel.moveDay(by: 1)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(FT.Palette.background)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(FT.Palette.separator)
+                .frame(height: FT.Metric.hairline)
+        }
+        .coachTarget(.dayNavigator)
+        .disabled(viewModel.isSelecting)
+        .opacity(viewModel.isSelecting ? 0.4 : 1)
+    }
+
+    private var navigatorSubtitle: String {
+        if viewModel.isLoading || !viewModel.hasLoaded { return L10n.searching }
+        return viewModel.memories.isEmpty ? "—" : L10n.memoriesCount(viewModel.memories.count)
+    }
+
+    private func navigatorArrow(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 14, weight: .light))
+                .foregroundStyle(FT.Palette.textSecondary)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    private var datePickerSheet: some View {
+        VStack(spacing: 0) {
+            FTTopBar(title: L10n.chooseDate) {
+                FTBarButton(title: L10n.today) {
+                    viewModel.showToday()
+                    showDatePicker = false
+                }
+            } trailing: {
+                FTBarButton(title: L10n.done, prominent: true) {
+                    showDatePicker = false
+                }
+            }
+
+            DatePicker(
+                L10n.chooseDate,
+                selection: Binding(
+                    get: { viewModel.referenceDate },
+                    set: { viewModel.showDay($0) }
+                ),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .labelsHidden()
+            .tint(FT.Palette.accent)
+            .padding(.horizontal, 16)
+
+            Spacer(minLength: 0)
+        }
+        .background(FT.Palette.background.ignoresSafeArea())
+        .environment(\.locale, languageStore.language.locale)
+        .preferredColorScheme(.dark)
+        .presentationDetents([.height(520), .large])
+    }
+
     // MARK: - Liste des souvenirs
 
     @ViewBuilder
     private var memoriesList: some View {
-        if viewModel.isLoading && viewModel.memories.isEmpty {
+        if !viewModel.hasLoaded || (viewModel.isLoading && viewModel.memories.isEmpty) {
             VStack {
                 Spacer()
-                Text("Recherche en cours")
+                ProgressView()
+                    .tint(FT.Palette.textSecondary)
+                    .padding(.bottom, 12)
+                Text(L10n.searching)
                     .ftSectionLabel(secondary: true)
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(FT.Palette.background)
         } else if viewModel.memories.isEmpty {
-            FTMessageScreen(
-                symbol: "calendar",
-                title: "Aucun souvenir\nle \(viewModel.todayLabel)",
-                message: "Votre photothèque ne contient aucune photo prise ce jour-là une année précédente. Revenez demain."
-            )
+            emptyState
         } else {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -183,6 +382,7 @@ struct ContentView: View {
                                 title: group.photos.first?.title ?? "",
                                 subtitle: group.photos.first?.subtitle
                             )
+                            .accessibilityAddTraits(.isHeader)
                         }
                     }
                 }
@@ -192,15 +392,38 @@ struct ContentView: View {
             .scrollIndicators(.hidden)
             .background(FT.Palette.background)
             .refreshable { await viewModel.reload() }
+            .opacity(viewModel.isLoading ? 0.6 : 1)
+            .animation(.easeOut(duration: 0.15), value: viewModel.isLoading)
+        }
+    }
+
+    private var emptyState: some View {
+        FTMessageScreen(
+            symbol: "calendar",
+            title: L10n.noMemoriesTitle(viewModel.dayLabel),
+            message: viewModel.nearestSearchFailed ? L10n.nothingNearby : L10n.noMemoriesMessage
+        ) {
+            Button {
+                Task { await viewModel.showNearestMemories() }
+            } label: {
+                HStack(spacing: 10) {
+                    if viewModel.isSearchingNearest {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(FT.Palette.textPrimary)
+                    }
+                    Text(L10n.showNearest)
+                }
+            }
+            .buttonStyle(.ftOutline)
+            .disabled(viewModel.isSearchingNearest)
         }
     }
 
     private func grid(for photos: [MemoryPhoto]) -> some View {
         LazyVGrid(
-            columns: Array(
-                repeating: GridItem(.flexible(), spacing: FT.Metric.gridSpacing),
-                count: 3
-            ),
+            // Colonnes adaptatives : 3 sur iPhone, davantage sur iPad.
+            columns: [GridItem(.adaptive(minimum: 104, maximum: 220), spacing: FT.Metric.gridSpacing)],
             spacing: FT.Metric.gridSpacing
         ) {
             ForEach(photos) { photo in
@@ -223,21 +446,34 @@ struct ContentView: View {
             if viewModel.isSelecting {
                 viewModel.toggleSelection(photo)
             } else {
-                selected = photo
+                viewer = ViewerRequest(id: photo.id, memories: viewModel.orderedMemories)
             }
         } label: {
             thumbnail(photo)
         }
         .buttonStyle(.plain)
+        .coachTarget(.firstPhoto, active: photo.id == viewModel.firstMemoryID)
+        .accessibilityLabel(accessibilityLabel(for: photo))
+        .accessibilityAddTraits(viewModel.selection.contains(photo.id) ? [.isImage, .isSelected] : .isImage)
+    }
+
+    private func accessibilityLabel(for photo: MemoryPhoto) -> String {
+        var parts = [photo.title, photo.subtitle]
+        if viewModel.isHidden(photo) { parts.append(L10n.hiddenFromWidget) }
+        return parts.joined(separator: ", ")
     }
 
     private func thumbnail(_ photo: MemoryPhoto) -> some View {
         let isHidden = viewModel.isHidden(photo)
         let isSelected = viewModel.selection.contains(photo.id)
 
-        return MemoryThumbnail(memory: photo)
-            .aspectRatio(1, contentMode: .fill)
+        return Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                MemoryThumbnail(memory: photo)
+            }
             .clipped()
+            .contentShape(Rectangle())
             // Une photo écartée reste visible dans l'app, mais assourdie.
             .opacity(isHidden ? 0.32 : 1)
             .overlay(alignment: .topTrailing) {
@@ -273,7 +509,7 @@ struct ContentView: View {
             viewModel.toggleHidden(photo)
         } label: {
             Label(
-                viewModel.isHidden(photo) ? "Afficher dans le widget" : "Masquer du widget",
+                viewModel.isHidden(photo) ? L10n.showInWidget : L10n.hideFromWidget,
                 systemImage: viewModel.isHidden(photo) ? "eye" : "eye.slash"
             )
         }
@@ -281,19 +517,21 @@ struct ContentView: View {
         Button {
             viewModel.beginSelection(with: photo)
         } label: {
-            Label("Sélectionner plusieurs", systemImage: "checkmark.circle")
+            Label(L10n.selectSeveral, systemImage: "checkmark.circle")
         }
     }
 
     // MARK: - États d'accès
 
-    private var onboarding: some View {
+    private var accessRequest: some View {
         FTMessageScreen(
             symbol: "photo.on.rectangle.angled",
-            title: "Vos souvenirs,\nchaque jour",
-            message: "FlashTime retrouve les photos prises le même jour les années passées et les affiche dans un widget sur votre écran d'accueil. Elles ne quittent jamais votre appareil."
+            title: L10n.welcomeTitle,
+            message: L10n.accessMessage
         ) {
-            Button("Autoriser l'accès aux photos") {
+            // Libellé neutre (« Continuer ») : la demande système suit
+            // immédiatement, conformément aux règles de l'App Store.
+            Button(L10n.continueLabel) {
                 Task { await viewModel.requestAccess() }
             }
             .buttonStyle(.ftOutlineProminent)
@@ -303,15 +541,79 @@ struct ContentView: View {
     private var accessDenied: some View {
         FTMessageScreen(
             symbol: "lock",
-            title: "Accès refusé",
-            message: "FlashTime a besoin de lire les dates de vos photos pour retrouver vos souvenirs. L'autorisation se règle dans les réglages du système."
+            title: L10n.deniedTitle,
+            message: L10n.deniedMessage
         ) {
-            Button("Ouvrir les réglages") {
+            Button(L10n.openSettings) {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
                 }
             }
             .buttonStyle(.ftOutline)
+        }
+    }
+
+    // MARK: - Actions
+
+    private func finishIntro() {
+        coachReady = false
+        introCompleted = true
+        // Laisse l'écran principal se mettre en place avant la première bulle.
+        Task {
+            try? await Task.sleep(for: .seconds(0.8))
+            coachReady = true
+        }
+    }
+
+    private func settingsDismissed() {
+        viewModel.refreshHidden()
+        if replayAfterSettings {
+            replayAfterSettings = false
+            coach.reset()
+            introIncludesLanguage = false
+            introCompleted = false
+        }
+    }
+
+    /// Lien `flashtime://memory?id=…` envoyé par le widget : ouvre la photo.
+    private func openFromWidget(_ url: URL) {
+        guard url.scheme == "flashtime", url.host == "memory",
+              let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "id" })?.value,
+              introCompleted else { return }
+
+        showSettings = false
+        showDatePicker = false
+        Task {
+            if let memory = await viewModel.memoryForWidgetLink(id: id) {
+                viewer = ViewerRequest(id: memory.id, memories: viewModel.orderedMemories)
+            }
+        }
+    }
+
+    /// Compte les jours d'utilisation distincts. Au quatrième, si des souvenirs
+    /// sont affichés, iOS est invité à proposer une note — une seule fois.
+    /// Le système décide lui-même d'afficher ou non la demande.
+    private func registerUsageDay() {
+        let defaults = UserDefaults.standard
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let today = "\(parts.year ?? 0)-\(parts.month ?? 0)-\(parts.day ?? 0)"
+
+        var days = defaults.stringArray(forKey: "usage.days") ?? []
+        if !days.contains(today) {
+            days.append(today)
+            defaults.set(Array(days.suffix(10)), forKey: "usage.days")
+        }
+
+        guard days.count >= 4,
+              !defaults.bool(forKey: "review.requested"),
+              introCompleted,
+              !viewModel.memories.isEmpty else { return }
+
+        defaults.set(true, forKey: "review.requested")
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            requestReview()
         }
     }
 }

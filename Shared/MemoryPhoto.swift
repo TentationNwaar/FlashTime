@@ -15,18 +15,16 @@ nonisolated struct MemoryPhoto: Identifiable, Hashable, Sendable {
     /// Nombre d'années écoulées depuis la prise de vue (>= 1).
     let yearsAgo: Int
 
-    /// Titre affiché sur le widget : « Il y a 10 ans ».
+    /// Titre affiché sur le widget : « Il y a 10 ans », dans la langue choisie.
     var title: String {
-        yearsAgo == 1 ? "Il y a 1 an" : "Il y a \(yearsAgo) ans"
+        L10n.yearsAgo(yearsAgo)
     }
 
     /// Sous-titre : « 4 août 2016 ».
     /// `FormatStyle` plutôt qu'un `DateFormatter` statique : c'est une valeur,
     /// donc utilisable sans risque depuis plusieurs contextes de concurrence.
     var subtitle: String {
-        creationDate.formatted(
-            .dateTime.day().month(.wide).year().locale(Locale(identifier: "fr_FR"))
-        )
+        L10n.fullDate(creationDate)
     }
 }
 

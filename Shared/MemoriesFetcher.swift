@@ -93,6 +93,36 @@ nonisolated enum MemoriesFetcher {
         return memories
     }
 
+    // MARK: - Jour le plus proche
+
+    /// Cherche, en s'éloignant alternativement vers l'avant et vers l'arrière,
+    /// le jour le plus proche de `reference` qui contient au moins un souvenir.
+    /// Chaque essai ne lit que des métadonnées ; l'appel reste néanmoins à
+    /// exécuter hors du thread principal.
+    static func nearestDayWithMemories(
+        from reference: Date,
+        settings: MemorySettings,
+        maxOffset: Int = 120,
+        calendar: Calendar = .current
+    ) -> Date? {
+        // Photothèque vide (ou sélection limitée vide) : inutile de chercher.
+        let probe = PHFetchOptions()
+        probe.fetchLimit = 1
+        guard PHAsset.fetchAssets(with: .image, options: probe).count > 0 else { return nil }
+
+        for offset in 1...max(1, maxOffset) {
+            for sign in [1, -1] {
+                guard let day = calendar.date(byAdding: .day, value: offset * sign, to: reference) else {
+                    continue
+                }
+                if !todaysMemories(reference: day, settings: settings, calendar: calendar).isEmpty {
+                    return day
+                }
+            }
+        }
+        return nil
+    }
+
     // MARK: - Chargement d'image
 
     /// Cadrage demandé. Ce type maison évite d'exposer `PHImageContentMode` aux

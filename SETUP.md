@@ -1,5 +1,7 @@
 # FlashTime — mise en place dans Xcode
 
+> Pour la publication sur l'App Store, voir `PUBLICATION.md`.
+
 Le code est écrit. Il reste à créer la target widget et à relier les fichiers,
 ce qui se fait dans l'interface d'Xcode (5 minutes).
 

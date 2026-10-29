@@ -132,6 +132,69 @@ Comment faire :
 Les captures d'une langue servent pour les autres si l'on n'en fournit pas de
 spécifiques.
 
+## Étape 5 bis — Créer les achats intégrés (premium et pourboires)
+
+Un **achat intégré** (In-App Purchase) est un produit vendu à l'intérieur de
+l'app. FlashTime en propose quatre. Leurs identifiants sont déjà écrits dans
+le code (`FlashTime/PremiumStore.swift`) : ils doivent être recopiés **à
+l'identique** dans App Store Connect, sinon l'app n'affiche aucun prix.
+
+| Référence | Identifiant de produit | Type | Prix |
+|---|---|---|---|
+| Premium | `flashtime.premium.unlock` | Non consommable | 2,99 € |
+| Tip small | `flashtime.tip.small` | Consommable | 0,99 € |
+| Tip medium | `flashtime.tip.medium` | Consommable | 2,99 € |
+| Tip large | `flashtime.tip.large` | Consommable | 4,99 € |
+
+*Non consommable* : acheté une fois, conservé pour toujours et restaurable
+sur un autre appareil. *Consommable* : peut être acheté plusieurs fois (les
+pourboires).
+
+### 1. Accepter le contrat des apps payantes
+
+Sans ce contrat, Apple ne peut pas vous verser d'argent et les achats ne
+s'affichent pas.
+
+1. App Store Connect › **Accords, impôts et activités bancaires** (Business).
+2. Contrat **Paid Apps** › **Afficher et accepter**.
+3. Remplir **Informations bancaires** (IBAN) et **Informations fiscales**
+   (formulaire W-8BEN pour un particulier hors des États-Unis).
+4. Le statut doit passer à « Actif » (quelques heures à quelques jours).
+
+### 2. Créer les produits
+
+1. **Apps › FlashTime › Monétisation › Achats intégrés** › bouton **+**.
+2. Type **Non consommable**, nom de référence `Premium`, identifiant
+   `flashtime.premium.unlock` › **Créer**.
+3. Dans la fiche du produit :
+   - **Disponibilité** : tous les pays ;
+   - **Prix** : 2,99 € (choisir la Suisse ou la France comme pays de
+     référence, Apple calcule les autres devises) ;
+   - **Localisation** : ajouter English (U.S.), French, Italian, German avec
+     le nom et la description du tableau `AppStore/metadata.md` ;
+   - **Informations pour la revue** : une capture de l'écran Premium (faire
+     une capture de l'écran « FlashTime Premium » sur le simulateur) et la
+     note : « Unlocks widget styles, favourites, colour themes and videos.
+     Open Settings › Discover Premium. »
+4. Recommencer avec les trois pourboires, en type **Consommable**.
+
+### 3. Les joindre à la version
+
+Les premiers achats intégrés doivent être soumis **avec** une version de
+l'app. Sur la page de la version 1.0, section **Achats intégrés et
+abonnements**, cliquer **+** et cocher les quatre produits avant de soumettre.
+
+### 4. Tester sans payer
+
+- **Dans Xcode** : le fichier `FlashTime.storekit` simule l'App Store en local.
+  Il est déjà relié au schéma. Pour vérifier : **Product › Scheme › Edit
+  Scheme… › Run › Options › StoreKit Configuration** doit afficher
+  `FlashTime.storekit`. Les achats sont alors fictifs et gratuits.
+  Menu **Debug › StoreKit › Manage Transactions** pour annuler un achat et
+  retester.
+- **Sur TestFlight** : les achats passent par le « bac à sable » d'Apple
+  (sandbox) et ne sont jamais facturés.
+
 ## Étape 6 — Envoyer le build
 
 1. Dans Xcode, choisir comme destination **Any iOS Device (arm64)**.
@@ -156,7 +219,7 @@ Menu **iOS App › 1.0 Prepare for Submission** :
    mots-clés (tout est dans `metadata.md`).
 2. URL d'assistance : `https://tentationnwaar.github.io/FlashTime/`.
 3. **Build** : cliquer **+** et choisir le build envoyé à l'étape 6.
-4. Copyright : `2026 Maxence Weyermann`.
+4. Copyright : `2026 BubbleBlack`.
 5. **Informations pour la revue** : nom, téléphone, e-mail de contact ;
    décocher *Connexion requise* ; coller les notes en anglais de
    `metadata.md`.

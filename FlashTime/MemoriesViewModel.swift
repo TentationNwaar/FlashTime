@@ -27,6 +27,9 @@ final class MemoriesViewModel: ObservableObject {
     @Published private(set) var isSearchingNearest = false
     @Published private(set) var nearestSearchFailed = false
 
+    /// Souvenirs favoris (premium).
+    @Published private(set) var favorites: Set<String> = FavoritePhotos.identifiers
+
     /// Photos écartées du widget. L'app continue de les afficher, grisées.
     @Published private(set) var hidden: Set<String> = HiddenPhotos.identifiers
 
@@ -98,10 +101,15 @@ final class MemoriesViewModel: ObservableObject {
 
         let settings = self.settings
         let reference = referenceDate
+        let includeVideos = VideoMemories.isEnabled
         // La requête PhotoKit s'exécute hors du thread principal : sur une
         // grande photothèque, elle ne doit pas figer l'interface.
         let result = await Task.detached(priority: .userInitiated) {
-            MemoriesFetcher.todaysMemories(reference: reference, settings: settings)
+            MemoriesFetcher.todaysMemories(
+                reference: reference,
+                settings: settings,
+                includeVideos: includeVideos
+            )
         }.value
 
         guard token == loadToken else { return }
@@ -186,6 +194,30 @@ final class MemoriesViewModel: ObservableObject {
 
     func toggleHidden(_ memory: MemoryPhoto) {
         setHidden(!isHidden(memory), for: [memory.id])
+    }
+
+    // MARK: - Favoris
+
+    func isFavorite(_ memory: MemoryPhoto) -> Bool {
+        favorites.contains(memory.id)
+    }
+
+    /// Bascule le cœur d'un souvenir. Renvoie faux si le premium manque :
+    /// l'écran appelant présente alors l'offre.
+    @discardableResult
+    func toggleFavorite(_ memory: MemoryPhoto) -> Bool {
+        guard PremiumAccess.isUnlocked else { return false }
+        FavoritePhotos.toggle(memory.id)
+        refreshFavorites()
+        return true
+    }
+
+    func refreshFavorites() {
+        let current = FavoritePhotos.identifiers
+        guard current != favorites else { return }
+        favorites = current
+        // Les favoris reviennent plus souvent dans le widget.
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Sélection

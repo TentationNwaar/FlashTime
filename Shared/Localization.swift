@@ -389,6 +389,130 @@ nonisolated enum L10n {
         tr("How to add the widget", "Ajouter le widget", "Come aggiungere il widget", "Widget hinzufügen")
     }
 
+    // MARK: Premium
+
+    static var premiumName: String { "FlashTime Premium" }
+    static var premiumTagline: String {
+        tr("One purchase, yours forever. No subscription.",
+           "Un seul achat, à vous pour toujours. Sans abonnement.",
+           "Un solo acquisto, tuo per sempre. Nessun abbonamento.",
+           "Einmal kaufen, für immer behalten. Kein Abo.")
+    }
+    static var featureStylesTitle: String {
+        tr("Widget styles", "Styles de widget", "Stili del widget", "Widget-Stile")
+    }
+    static var featureStylesBody: String {
+        tr("Instant print, photo only or fine frame.",
+           "Tirage instantané, photo seule ou filet fin.",
+           "Stampa istantanea, solo foto o cornice sottile.",
+           "Sofortbild, nur Foto oder feiner Rahmen.")
+    }
+    static var featureFavoritesTitle: String { tr("Favourites", "Favoris", "Preferiti", "Favoriten") }
+    static var featureFavoritesBody: String {
+        tr("Heart your best memories: the widget shows them twice as often.",
+           "Mettez un cœur à vos plus beaux souvenirs : le widget les montre deux fois plus souvent.",
+           "Metti un cuore ai ricordi più belli: il widget li mostra il doppio delle volte.",
+           "Markieren Sie Ihre schönsten Erinnerungen: Das Widget zeigt sie doppelt so oft.")
+    }
+    static var featureThemesTitle: String { tr("Colour themes", "Thèmes de couleur", "Temi di colore", "Farbthemen") }
+    static var featureThemesBody: String {
+        tr("Cream, pure black or midnight blue.",
+           "Crème, noir pur ou bleu nuit.",
+           "Crema, nero puro o blu notte.",
+           "Creme, Tiefschwarz oder Nachtblau.")
+    }
+    static var featureVideosTitle: String {
+        tr("Videos and Live Photos", "Vidéos et Live Photos", "Video e Live Photo", "Videos und Live Photos")
+    }
+    static var featureVideosBody: String {
+        tr("Relive the videos of the day and bring your Live Photos to life.",
+           "Revoyez les vidéos du jour et animez vos Live Photos.",
+           "Rivedi i video del giorno e anima le tue Live Photo.",
+           "Sehen Sie die Videos des Tages und erwecken Sie Ihre Live Photos zum Leben.")
+    }
+    static func unlockFor(_ price: String) -> String {
+        tr("Unlock for \(price)", "Débloquer pour \(price)", "Sblocca per \(price)", "Für \(price) freischalten")
+    }
+    static var premiumActive: String {
+        tr("Premium is active. Thank you!", "Premium est activé. Merci !", "Premium è attivo. Grazie!", "Premium ist aktiv. Danke!")
+    }
+    static var discoverPremium: String {
+        tr("Discover Premium", "Découvrir Premium", "Scopri Premium", "Premium entdecken")
+    }
+    static var restorePurchases: String {
+        tr("Restore purchases", "Restaurer les achats", "Ripristina acquisti", "Käufe wiederherstellen")
+    }
+    static var restoreSuccess: String {
+        tr("Your purchase has been restored.", "Votre achat a été restauré.", "Il tuo acquisto è stato ripristinato.", "Ihr Kauf wurde wiederhergestellt.")
+    }
+    static var restoreNothing: String {
+        tr("No previous purchase was found for this Apple Account.",
+           "Aucun achat précédent n'a été trouvé pour ce compte Apple.",
+           "Nessun acquisto precedente trovato per questo Account Apple.",
+           "Für diesen Apple Account wurde kein früherer Kauf gefunden.")
+    }
+    static var purchaseFailed: String {
+        tr("The purchase could not be completed. Please try again.",
+           "L'achat n'a pas pu aboutir. Veuillez réessayer.",
+           "Non è stato possibile completare l'acquisto. Riprova.",
+           "Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.")
+    }
+    static var storeUnavailable: String {
+        tr("The App Store is unavailable right now.",
+           "L'App Store est indisponible pour le moment.",
+           "L'App Store non è al momento disponibile.",
+           "Der App Store ist derzeit nicht verfügbar.")
+    }
+    static var supportTitle: String {
+        tr("Support FlashTime", "Soutenir FlashTime", "Sostieni FlashTime", "FlashTime unterstützen")
+    }
+    static var supportBody: String {
+        tr("FlashTime is made by an independent developer. A tip helps keep it ad-free.",
+           "FlashTime est conçu par un développeur indépendant. Un pourboire l'aide à rester sans publicité.",
+           "FlashTime è realizzata da uno sviluppatore indipendente. Una mancia la aiuta a restare senza pubblicità.",
+           "FlashTime wird von einem unabhängigen Entwickler gemacht. Ein Trinkgeld hilft, sie werbefrei zu halten.")
+    }
+    static var tipSmall: String { tr("Small thanks", "Petit merci", "Piccolo grazie", "Kleines Danke") }
+    static var tipMedium: String { tr("Big thanks", "Grand merci", "Grande grazie", "Großes Danke") }
+    static var tipLarge: String { tr("Huge thanks", "Immense merci", "Enorme grazie", "Riesiges Danke") }
+    static var tipThanks: String {
+        tr("Thank you so much for your support!",
+           "Merci beaucoup pour votre soutien !",
+           "Grazie mille per il tuo sostegno!",
+           "Vielen Dank für Ihre Unterstützung!")
+    }
+    static var purchaseFootnote: String {
+        tr("Payment is handled by Apple and charged to your Apple Account. Tips are optional and unlock nothing.",
+           "Le paiement est géré par Apple et débité de votre compte Apple. Les pourboires sont facultatifs et ne débloquent rien.",
+           "Il pagamento è gestito da Apple e addebitato sul tuo Account Apple. Le mance sono facoltative e non sbloccano nulla.",
+           "Die Zahlung wird von Apple abgewickelt und Ihrem Apple Account belastet. Trinkgelder sind freiwillig und schalten nichts frei.")
+    }
+    static var appearance: String { tr("Appearance", "Apparence", "Aspetto", "Darstellung") }
+    static var theme: String { tr("Theme", "Thème", "Tema", "Thema") }
+    static var widgetStyle: String { tr("Widget style", "Style du widget", "Stile del widget", "Widget-Stil") }
+    static var includeVideos: String {
+        tr("Show videos of the day", "Afficher les vidéos du jour", "Mostra i video del giorno", "Videos des Tages anzeigen")
+    }
+    static var addFavorite: String {
+        tr("Add to favourites", "Ajouter aux favoris", "Aggiungi ai preferiti", "Zu Favoriten hinzufügen")
+    }
+    static var removeFavorite: String {
+        tr("Remove from favourites", "Retirer des favoris", "Rimuovi dai preferiti", "Aus Favoriten entfernen")
+    }
+    static var favorites: String { featureFavoritesTitle }
+    static var noFavoritesTitle: String {
+        tr("No favourites\nyet", "Pas encore\nde favoris", "Ancora nessun\npreferito", "Noch keine\nFavoriten")
+    }
+    static var noFavoritesBody: String {
+        tr("Touch and hold a memory, or use the heart in full screen, to add it here.",
+           "Faites un appui long sur un souvenir, ou touchez le cœur en plein écran, pour l'ajouter ici.",
+           "Tieni premuto un ricordo, o tocca il cuore a schermo intero, per aggiungerlo qui.",
+           "Halten Sie eine Erinnerung gedrückt oder tippen Sie im Vollbild auf das Herz, um sie hier hinzuzufügen.")
+    }
+    static var premiumFeature: String {
+        tr("Premium feature", "Fonction Premium", "Funzione Premium", "Premium-Funktion")
+    }
+
     // MARK: Widget
 
     static var previousMemory: String {

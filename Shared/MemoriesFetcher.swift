@@ -24,6 +24,7 @@ nonisolated enum MemoriesFetcher {
     static func todaysMemories(
         reference: Date = Date(),
         settings: MemorySettings = .load(),
+        includeVideos: Bool = false,
         calendar: Calendar = .current
     ) -> [MemoryPhoto] {
 
@@ -70,13 +71,17 @@ nonisolated enum MemoriesFetcher {
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
         options.includeAssetSourceTypes = [.typeUserLibrary, .typeCloudShared, .typeiTunesSynced]
 
-        let result = PHAsset.fetchAssets(with: .image, options: options)
+        // Vidéos : uniquement dans l'app, avec le premium.
+        let result = includeVideos
+            ? PHAsset.fetchAssets(with: options)
+            : PHAsset.fetchAssets(with: .image, options: options)
 
         var memories: [MemoryPhoto] = []
         memories.reserveCapacity(result.count)
 
         result.enumerateObjects { asset, _, _ in
-            guard let created = asset.creationDate else { return }
+            guard let created = asset.creationDate,
+                  asset.mediaType == .image || asset.mediaType == .video else { return }
 
             if settings.excludeScreenshots,
                asset.mediaSubtypes.contains(.photoScreenshot) { return }
@@ -85,11 +90,51 @@ nonisolated enum MemoriesFetcher {
             let yearsAgo = currentYear - assetYear
             guard yearsAgo >= 1 else { return }
 
-            memories.append(
-                MemoryPhoto(id: asset.localIdentifier, creationDate: created, yearsAgo: yearsAgo)
-            )
+            memories.append(memory(from: asset, created: created, yearsAgo: yearsAgo))
         }
 
+        return memories
+    }
+
+    private static func memory(from asset: PHAsset, created: Date, yearsAgo: Int) -> MemoryPhoto {
+        let kind: MemoryPhoto.Kind
+        if asset.mediaType == .video {
+            kind = .video
+        } else if asset.mediaSubtypes.contains(.photoLive) {
+            kind = .livePhoto
+        } else {
+            kind = .photo
+        }
+        return MemoryPhoto(
+            id: asset.localIdentifier,
+            creationDate: created,
+            yearsAgo: yearsAgo,
+            kind: kind,
+            duration: asset.duration
+        )
+    }
+
+    // MARK: - Favoris
+
+    /// Recharge les souvenirs favoris, toutes dates confondues, du plus récent
+    /// au plus ancien. Les photos supprimées de la photothèque sont ignorées.
+    static func favoriteMemories(
+        ids: Set<String>,
+        reference: Date = Date(),
+        calendar: Calendar = .current
+    ) -> [MemoryPhoto] {
+        guard !ids.isEmpty else { return [] }
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        let result = PHAsset.fetchAssets(withLocalIdentifiers: Array(ids), options: options)
+        let currentYear = calendar.component(.year, from: reference)
+
+        var memories: [MemoryPhoto] = []
+        result.enumerateObjects { asset, _, _ in
+            guard let created = asset.creationDate else { return }
+            let yearsAgo = max(1, currentYear - calendar.component(.year, from: created))
+            memories.append(memory(from: asset, created: created, yearsAgo: yearsAgo))
+        }
         return memories
     }
 

@@ -132,8 +132,8 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
                         date: date,
                         state: .memory(memory),
                         imageData: data,
-                        index: position + 1,
-                        total: memories.count
+                        index: displayIndex(of: memory, in: memories),
+                        total: uniqueCount(memories)
                     )
                 )
             }
@@ -170,7 +170,7 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
                         state: .memory(first),
                         imageData: data,
                         index: 1,
-                        total: tomorrow.count
+                        total: uniqueCount(tomorrow)
                     )
                 )
             } else {
@@ -194,7 +194,23 @@ nonisolated struct MemoryTimelineProvider: TimelineProvider {
 
         let day = Calendar.current.startOfDay(for: date).timeIntervalSince1970
         var generator = SeededGenerator(seed: UInt64(max(0, day)))
-        return memories.shuffled(using: &generator)
+        let shuffled = memories.shuffled(using: &generator)
+
+        // Premium : les favoris reviennent une seconde fois dans le cycle,
+        // ils sont donc affichés deux fois plus souvent.
+        guard PremiumAccess.isUnlocked else { return shuffled }
+        let favorites = FavoritePhotos.identifiers
+        return shuffled + shuffled.filter { favorites.contains($0.id) }
+    }
+
+    /// Rang affiché « 3/12 » : position de la première apparition du souvenir,
+    /// les favoris répétés n'étant comptés qu'une fois.
+    private func displayIndex(of memory: MemoryPhoto, in rotation: [MemoryPhoto]) -> Int {
+        (rotation.firstIndex { $0.id == memory.id } ?? 0) + 1
+    }
+
+    private func uniqueCount(_ rotation: [MemoryPhoto]) -> Int {
+        Set(rotation.map(\.id)).count
     }
 
     /// Taille de rendu en pixels, dérivée de la taille affichée du widget.

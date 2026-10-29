@@ -13,20 +13,23 @@ nonisolated enum FT {
 
     // MARK: - Palette
 
+    /// Couleurs du thème actif. Le thème anthracite est celui de la version
+    /// gratuite ; les autres sont réservés au premium (voir `AppTheme`).
     enum Palette {
-        /// Fond principal, gris neutre sombre plutôt que noir pur.
-        static let background = Color(red: 0.149, green: 0.149, blue: 0.149)      // #262626
+        private static var p: AppTheme.Colors { AppTheme.current.colors }
+
+        /// Fond principal.
+        static var background: Color { p.background }
         /// Bandeaux de section et surfaces surélevées.
-        static let surface = Color(red: 0.204, green: 0.204, blue: 0.204)         // #343434
+        static var surface: Color { p.surface }
         /// Surface de saisie / cellule.
-        static let elevated = Color(red: 0.176, green: 0.176, blue: 0.176)        // #2D2D2D
-        static let separator = Color(red: 0.271, green: 0.271, blue: 0.271)       // #454545
-        /// Blanc légèrement chaud, moins clinique que le blanc pur.
-        static let textPrimary = Color(red: 0.949, green: 0.941, blue: 0.925)     // #F2F0EC
-        static let textSecondary = Color(red: 0.604, green: 0.600, blue: 0.588)   // #9A9996
-        static let textTertiary = Color(red: 0.435, green: 0.435, blue: 0.427)    // #6F6F6D
-        /// Bleu de l'icône, réservé aux éléments actifs.
-        static let accent = Color(red: 0.027, green: 0.439, blue: 0.996)          // #0770FE
+        static var elevated: Color { p.elevated }
+        static var separator: Color { p.separator }
+        static var textPrimary: Color { p.textPrimary }
+        static var textSecondary: Color { p.textSecondary }
+        static var textTertiary: Color { p.textTertiary }
+        /// Couleur réservée aux éléments actifs.
+        static var accent: Color { p.accent }
     }
 
     // MARK: - Typographie
@@ -162,4 +165,89 @@ struct FTOutlineButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == FTOutlineButtonStyle {
     static var ftOutline: FTOutlineButtonStyle { FTOutlineButtonStyle() }
     static var ftOutlineProminent: FTOutlineButtonStyle { FTOutlineButtonStyle(prominent: true) }
+}
+
+// MARK: - Thèmes de couleur
+
+nonisolated enum AppTheme: String, CaseIterable, Identifiable, Sendable {
+
+    /// Anthracite neutre : thème d'origine, gratuit.
+    case anthracite
+    /// Crème clair, façon papier photo.
+    case cream
+    /// Noir pur, économe sur les écrans OLED.
+    case black
+    /// Bleu nuit.
+    case midnight
+
+    var id: String { rawValue }
+
+    var isPremium: Bool { self != .anthracite }
+
+    var isLight: Bool { self == .cream }
+
+    var name: String {
+        switch self {
+        case .anthracite: return L10n.tr("Anthracite", "Anthracite", "Antracite", "Anthrazit")
+        case .cream: return L10n.tr("Cream", "Crème", "Crema", "Creme")
+        case .black: return L10n.tr("Pure black", "Noir pur", "Nero puro", "Tiefschwarz")
+        case .midnight: return L10n.tr("Midnight", "Bleu nuit", "Blu notte", "Nachtblau")
+        }
+    }
+
+    struct Colors: Sendable {
+        let background, surface, elevated, separator: Color
+        let textPrimary, textSecondary, textTertiary, accent: Color
+    }
+
+    private static func rgb(_ hex: UInt32) -> Color {
+        Color(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
+        )
+    }
+
+    var colors: Colors {
+        let c = AppTheme.rgb
+        switch self {
+        case .anthracite:
+            return Colors(background: c(0x262626), surface: c(0x343434), elevated: c(0x2D2D2D),
+                          separator: c(0x454545), textPrimary: c(0xF2F0EC), textSecondary: c(0x9A9996),
+                          textTertiary: c(0x6F6F6D), accent: c(0x0770FE))
+        case .cream:
+            return Colors(background: c(0xF4F0E8), surface: c(0xE9E3D7), elevated: c(0xEDE8DE),
+                          separator: c(0xD4CCBE), textPrimary: c(0x1F1D1A), textSecondary: c(0x6B665E),
+                          textTertiary: c(0x9A948A), accent: c(0x0763E0))
+        case .black:
+            return Colors(background: c(0x000000), surface: c(0x121212), elevated: c(0x0B0B0B),
+                          separator: c(0x2A2A2A), textPrimary: c(0xF2F0EC), textSecondary: c(0x8E8D8A),
+                          textTertiary: c(0x5E5E5C), accent: c(0x0770FE))
+        case .midnight:
+            return Colors(background: c(0x0F1A2E), surface: c(0x17253F), elevated: c(0x132038),
+                          separator: c(0x27395C), textPrimary: c(0xEEF2F8), textSecondary: c(0x93A3BD),
+                          textTertiary: c(0x61718B), accent: c(0x4D9BFF))
+        }
+    }
+
+    private static let key = "premium.theme"
+
+    /// Thème actif. Sans premium, l'app revient toujours à l'anthracite.
+    static var current: AppTheme {
+        guard PremiumAccess.isUnlocked,
+              let raw = AppGroup.defaults.string(forKey: key),
+              let theme = AppTheme(rawValue: raw) else { return .anthracite }
+        return theme
+    }
+
+    static func save(_ theme: AppTheme) {
+        AppGroup.defaults.set(theme.rawValue, forKey: key)
+    }
+}
+
+extension FT {
+    /// Apparence système assortie au thème (barre d'état, contrôles natifs).
+    static var colorScheme: ColorScheme {
+        AppTheme.current.isLight ? .light : .dark
+    }
 }

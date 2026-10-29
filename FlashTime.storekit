@@ -1,0 +1,110 @@
+{
+  "appPolicies": {
+    "eula": "",
+    "policies": [
+      {
+        "locale": "en_US",
+        "policyText": "",
+        "policyURL": ""
+      }
+    ]
+  },
+  "identifier": "F1A5B7C9",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "3758200036",
+      "localizations": [
+        {
+          "description": "Widget styles, favourites, themes and videos.",
+          "displayName": "FlashTime Premium",
+          "locale": "en_US"
+        },
+        {
+          "description": "Styles de widget, favoris, thèmes et vidéos.",
+          "displayName": "FlashTime Premium",
+          "locale": "fr"
+        }
+      ],
+      "productID": "flashtime.premium.unlock",
+      "referenceName": "Premium",
+      "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "2199050805",
+      "localizations": [
+        {
+          "description": "A small tip to support FlashTime.",
+          "displayName": "Small thanks",
+          "locale": "en_US"
+        },
+        {
+          "description": "Un petit pourboire pour soutenir FlashTime.",
+          "displayName": "Petit merci",
+          "locale": "fr"
+        }
+      ],
+      "productID": "flashtime.tip.small",
+      "referenceName": "Tip small",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "2712253894",
+      "localizations": [
+        {
+          "description": "A tip to support FlashTime.",
+          "displayName": "Big thanks",
+          "locale": "en_US"
+        },
+        {
+          "description": "Un pourboire pour soutenir FlashTime.",
+          "displayName": "Grand merci",
+          "locale": "fr"
+        }
+      ],
+      "productID": "flashtime.tip.medium",
+      "referenceName": "Tip medium",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "2665969526",
+      "localizations": [
+        {
+          "description": "A generous tip to support FlashTime.",
+          "displayName": "Huge thanks",
+          "locale": "en_US"
+        },
+        {
+          "description": "Un pourboire généreux pour soutenir FlashTime.",
+          "displayName": "Immense merci",
+          "locale": "fr"
+        }
+      ],
+      "productID": "flashtime.tip.large",
+      "referenceName": "Tip large",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "NT73585HKS",
+    "_failTransactionsEnabled": false,
+    "_lastSynchronizedDate": 0,
+    "_locale": "fr_FR",
+    "_storefront": "FRA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

@@ -22,6 +22,8 @@
 		FT01THEME0000000000000003 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT01THEME0000000000000001 /* Theme.swift */; };
 		FT02L10N00000000000000002 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT02L10N00000000000000001 /* Localization.swift */; };
 		FT02L10N00000000000000003 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT02L10N00000000000000001 /* Localization.swift */; };
+		FT03PREM00000000000000002 /* Premium.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT03PREM00000000000000001 /* Premium.swift */; };
+		FT03PREM00000000000000003 /* Premium.swift in Sources */ = {isa = PBXBuildFile; fileRef = FT03PREM00000000000000001 /* Premium.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +65,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5076F3B530935A3700B40B05 /* FlashTime.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = FlashTime.storekit; sourceTree = "<group>"; };
 		5080550F30223542007CDFD7 /* FlashTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlashTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5080551C30223544007CDFD7 /* FlashTimeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTimeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5080552630223544007CDFD7 /* FlashTimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashTimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -76,6 +79,7 @@
 		5080558530226AD3007CDFD7 /* FlashTimeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlashTimeWidgetExtension.entitlements; sourceTree = "<group>"; };
 		FT01THEME0000000000000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		FT02L10N00000000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		FT03PREM00000000000000001 /* Premium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Premium.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -158,6 +162,7 @@
 				5080555F30226996007CDFD7 /* FlashTimeWidget */,
 				5080555A30226995007CDFD7 /* Frameworks */,
 				5080551030223542007CDFD7 /* Products */,
+				5076F3B530935A3700B40B05 /* FlashTime.storekit */,
 			);
 			sourceTree = "<group>";
 		};
@@ -191,6 +196,7 @@
 				5080557A30226A67007CDFD7 /* PhotoAccess.swift */,
 				FT01THEME0000000000000001 /* Theme.swift */,
 				FT02L10N00000000000000001 /* Localization.swift */,
+				FT03PREM00000000000000001 /* Premium.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -381,6 +387,7 @@
 				5080557D30226A67007CDFD7 /* AppGroup.swift in Sources */,
 				FT01THEME0000000000000002 /* Theme.swift in Sources */,
 				FT02L10N00000000000000002 /* Localization.swift in Sources */,
+				FT03PREM00000000000000002 /* Premium.swift in Sources */,
 				5080557E30226A67007CDFD7 /* PhotoAccess.swift in Sources */,
 				5080557F30226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
 			);
@@ -408,6 +415,7 @@
 				5080558130226A67007CDFD7 /* AppGroup.swift in Sources */,
 				FT01THEME0000000000000003 /* Theme.swift in Sources */,
 				FT02L10N00000000000000003 /* Localization.swift in Sources */,
+				FT03PREM00000000000000003 /* Premium.swift in Sources */,
 				5080558230226A67007CDFD7 /* PhotoAccess.swift in Sources */,
 				5080558330226A67007CDFD7 /* MemoriesFetcher.swift in Sources */,
 			);
@@ -569,7 +577,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FlashTime;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Maxence Weyermann";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 BubbleBlack";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FlashTime reads the dates of your photos to show the ones taken on this day in previous years. Your photos never leave your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -608,7 +616,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = FlashTime;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Maxence Weyermann";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 BubbleBlack";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "FlashTime reads the dates of your photos to show the ones taken on this day in previous years. Your photos never leave your device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

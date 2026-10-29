@@ -13,10 +13,15 @@ struct FlashTimeApp: App {
 
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        // Démarre l'écoute des transactions StoreKit dès le lancement, comme
+        // le recommande Apple (achats approuvés plus tard, remboursements).
+        _ = PremiumStore.shared
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
             // Quand l'app passe en arrière-plan, on demande au widget de se

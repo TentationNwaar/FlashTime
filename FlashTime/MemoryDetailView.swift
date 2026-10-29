@@ -17,8 +17,17 @@ struct MemoryDetailView: View {
     let memories: [MemoryPhoto]
     let isHidden: (MemoryPhoto) -> Bool
     let onToggleHidden: (MemoryPhoto) -> Void
+    /// Prévient l'écran appelant qu'un favori a changé.
+    let onFavoritesChanged: () -> Void
+
+    /// Commandes toujours claires : la vue est sur fond noir, quel que soit
+    /// le thème de l'app.
+    static let light = Color(red: 0.949, green: 0.941, blue: 0.925)
 
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var premium = PremiumStore.shared
+    @State private var favoriteIDs = FavoritePhotos.identifiers
+    @State private var showPremium = false
     @State private var currentID: String
     @State private var showsChrome = true
     @State private var dragOffset: CGFloat = 0
@@ -31,11 +40,13 @@ struct MemoryDetailView: View {
         memories: [MemoryPhoto],
         startID: String,
         isHidden: @escaping (MemoryPhoto) -> Bool,
-        onToggleHidden: @escaping (MemoryPhoto) -> Void
+        onToggleHidden: @escaping (MemoryPhoto) -> Void,
+        onFavoritesChanged: @escaping () -> Void = {}
     ) {
         self.memories = memories
         self.isHidden = isHidden
         self.onToggleHidden = onToggleHidden
+        self.onFavoritesChanged = onFavoritesChanged
         _currentID = State(initialValue: startID)
     }
 
@@ -75,6 +86,7 @@ struct MemoryDetailView: View {
             }
         }
         .statusBarHidden(!showsChrome)
+        .sheet(isPresented: $showPremium) { PremiumView() }
         .sensoryFeedback(.selection, trigger: hiddenToggleCount)
     }
 
@@ -87,7 +99,7 @@ struct MemoryDetailView: View {
                     Text("\(currentIndex + 1)/\(memories.count)")
                         .font(FT.Typography.body(12).monospacedDigit())
                         .tracking(1)
-                        .foregroundStyle(FT.Palette.textPrimary.opacity(0.75))
+                        .foregroundStyle(Self.light.opacity(0.75))
                         .padding(.horizontal, 10)
                         .frame(height: 40)
                         .background(.black.opacity(0.25))
@@ -116,18 +128,18 @@ struct MemoryDetailView: View {
             Text(memory.title)
                 .font(FT.Typography.screenTitle(16))
                 .tracking(FT.Metric.titleTracking)
-                .foregroundStyle(FT.Palette.textPrimary)
+                .foregroundStyle(Self.light)
 
             Text(memory.subtitle)
                 .font(FT.Typography.body(12))
-                .foregroundStyle(FT.Palette.textPrimary.opacity(0.6))
+                .foregroundStyle(Self.light.opacity(0.6))
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 34)
         .background(.black.opacity(0.35))
         .overlay {
             Rectangle()
-                .stroke(FT.Palette.textPrimary.opacity(0.25), lineWidth: FT.Metric.hairline)
+                .stroke(Self.light.opacity(0.25), lineWidth: FT.Metric.hairline)
         }
         .accessibilityElement(children: .combine)
     }
@@ -152,6 +164,22 @@ struct MemoryDetailView: View {
                 iconLabel("square.and.arrow.up")
                     .opacity(0.35)
                     .accessibilityHidden(true)
+            }
+
+            let favorite = favoriteIDs.contains(memory.id)
+            iconButton(
+                favorite ? "heart.fill" : "heart",
+                label: favorite ? L10n.removeFavorite : L10n.addFavorite,
+                highlighted: favorite
+            ) {
+                guard premium.isPremium else {
+                    showPremium = true
+                    return
+                }
+                FavoritePhotos.toggle(memory.id)
+                favoriteIDs = FavoritePhotos.identifiers
+                hiddenToggleCount += 1
+                onFavoritesChanged()
             }
 
             iconButton(
@@ -181,12 +209,12 @@ struct MemoryDetailView: View {
     private func iconLabel(_ symbol: String, highlighted: Bool = false) -> some View {
         Image(systemName: symbol)
             .font(.system(size: 15, weight: .light))
-            .foregroundStyle(highlighted ? FT.Palette.accent : FT.Palette.textPrimary)
+            .foregroundStyle(highlighted ? FT.Palette.accent : Self.light)
             .frame(width: 44, height: 44)
             .background(.black.opacity(0.25))
             .overlay {
                 Rectangle()
-                    .stroke(FT.Palette.textPrimary.opacity(0.35), lineWidth: FT.Metric.hairline)
+                    .stroke(Self.light.opacity(0.35), lineWidth: FT.Metric.hairline)
             }
     }
 
@@ -225,21 +253,32 @@ private struct DetailPage: View {
         ZStack {
             Color.clear
 
-            if let image {
+            if memory.kind == .video, PremiumAccess.isUnlocked {
+                MemoryVideoView(memory: memory)
+            } else if memory.kind == .livePhoto, PremiumAccess.isUnlocked {
+                // L'image fixe s'affiche d'abord ; la Live Photo la remplace dès
+                // qu'elle est chargée (appui long pour la lire).
+                ZStack {
+                    if let image {
+                        Image(uiImage: image).resizable().scaledToFit()
+                    }
+                    MemoryLivePhotoView(memory: memory)
+                }
+            } else if let image {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
                     .transition(.opacity)
             } else {
                 ProgressView()
-                    .tint(FT.Palette.textSecondary)
+                    .tint(MemoryDetailView.light.opacity(0.6))
             }
         }
         .accessibilityElement()
         .accessibilityLabel("\(memory.title), \(memory.subtitle)")
         .accessibilityAddTraits(.isImage)
         .task(id: memory.id) {
-            guard image == nil else { return }
+            guard image == nil, memory.kind != .video else { return }
             // Taille généreuse : PhotoKit renvoie au plus la taille réelle de la
             // photo, donc on ne gaspille rien sur les images plus petites.
             let target = CGSize(width: 2400, height: 2400)

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A88FF"/><stop offset="1" stop-color="#0058E6"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7C2"/><stop offset="0.7" stop-color="#FFC98C"/><stop offset="1" stop-color="#FFB070"/></linearGradient>
+ <linearGradient id="hillB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7DB2FF"/><stop offset="1" stop-color="#4F92FA"/></linearGradient>
+ <linearGradient id="hillF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123F9E"/><stop offset="1" stop-color="#0B2C74"/></linearGradient>
+ <clipPath id="inner"><circle cx="372" cy="478" r="92"/><circle cx="505" cy="392" r="124"/><circle cx="652" cy="430" r="98"/><circle cx="724" cy="522" r="70"/><circle cx="574" cy="548" r="86"/><circle cx="432" cy="556" r="78"/><circle cx="318" cy="560" r="70"/><rect x="322" y="496" width="380" height="148" rx="74"/></clipPath>
+ <filter id="sh" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+  <feGaussianBlur in="SourceAlpha" stdDeviation="22"/><feOffset dy="22"/>
+  <feFlood flood-color="#002C80" flood-opacity="0.38"/><feComposite operator="in" in2="SourceAlpha"/>
+  <feComposite operator="in"/>
+ </filter>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/>
+<g transform="translate(512 500) scale(1.08) translate(-500 -520)">
+ <!-- ombre -->
+ <g fill="#002C80" opacity="0.35" filter="url(#blur)"></g>
+ <g fill="#003A9E" opacity="0.30" transform="translate(0 26)" style="filter:blur(22px)"><circle cx="372" cy="478" r="118"/><circle cx="505" cy="392" r="150"/><circle cx="652" cy="430" r="124"/><circle cx="724" cy="522" r="96"/><circle cx="574" cy="548" r="112"/><circle cx="432" cy="556" r="104"/><circle cx="318" cy="560" r="96"/><rect x="296" y="470" width="432" height="200" rx="100"/><circle cx="292" cy="710" r="40"/><circle cx="222" cy="790" r="24"/></g>
+ <!-- nuage blanc -->
+ <g fill="#FFFFFF"><circle cx="372" cy="478" r="118"/><circle cx="505" cy="392" r="150"/><circle cx="652" cy="430" r="124"/><circle cx="724" cy="522" r="96"/><circle cx="574" cy="548" r="112"/><circle cx="432" cy="556" r="104"/><circle cx="318" cy="560" r="96"/><rect x="296" y="470" width="432" height="200" rx="100"/></g>
+ <!-- photo dans la pensée -->
+ <g clip-path="url(#inner)">
+  <rect x="150" y="200" width="760" height="500" fill="url(#sky)"/>
+  <circle cx="618" cy="452" r="58" fill="#FF8A3D"/>
+  <circle cx="618" cy="452" r="88" fill="#FFFFFF" opacity="0.18"/>
+  <path d="M180 700 L180 600 C 300 600 330 470 440 470 C 540 470 570 590 680 610 L 860 640 L 860 700 Z" fill="url(#hillB)"/>
+  <path d="M180 720 L180 660 C 330 650 430 600 560 580 C 680 562 760 600 860 620 L 860 720 Z" fill="url(#hillF)"/>
+ </g>
+ <!-- bulles de pensée -->
+ <circle cx="292" cy="710" r="40" fill="#FFFFFF"/>
+ <circle cx="222" cy="790" r="24" fill="#FFFFFF"/>
+</g>
+</svg>

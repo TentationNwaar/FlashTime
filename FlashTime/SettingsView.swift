@@ -20,6 +20,10 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @ObservedObject private var languageStore = LanguageStore.shared
+    @ObservedObject private var premium = PremiumStore.shared
+    @ObservedObject private var themeStore = ThemeStore.shared
+    @State private var showPremium = false
+    @State private var includeVideos = VideoMemories.isEnabled
 
     @State private var hiddenCount = HiddenPhotos.identifiers.count
     @State private var showPrivacy = false
@@ -38,6 +42,8 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 0) {
+                        premiumSection
+                        appearanceSection
                         timeWindowSection
                         filtersSection
                         hiddenSection
@@ -51,12 +57,184 @@ struct SettingsView: View {
                 }
                 .scrollIndicators(.hidden)
             }
+            // Un changement de thème reconstruit l'écran avec les nouvelles couleurs.
+            .id(themeStore.theme)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(FT.colorScheme)
         .onDisappear { onSave(settings) }
         .sheet(isPresented: $showPrivacy) {
             PrivacyPolicyView()
         }
+        .sheet(isPresented: $showPremium) {
+            PremiumView()
+        }
+        // Résultat de « Restaurer les achats » lancé depuis les réglages.
+        .alert(
+            premium.notice ?? "",
+            isPresented: Binding(
+                get: { premium.notice != nil && !showPremium },
+                set: { if !$0 { premium.notice = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { premium.notice = nil }
+        }
+    }
+
+    // MARK: - Premium
+
+    private var premiumSection: some View {
+        VStack(spacing: 0) {
+            FTSectionBanner(title: L10n.premiumName)
+
+            if premium.isPremium {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.seal")
+                        .foregroundStyle(FT.Palette.accent)
+                    Text(L10n.premiumActive)
+                        .font(FT.Typography.body(15))
+                        .foregroundStyle(FT.Palette.textPrimary)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 48)
+
+                divider
+
+                linkRow(L10n.supportTitle, symbol: "cup.and.saucer") { showPremium = true }
+            } else {
+                footnote(L10n.premiumTagline)
+                    .padding(.top, 10)
+
+                Button(L10n.discoverPremium) { showPremium = true }
+                    .buttonStyle(.ftOutlineProminent)
+                    .padding(.bottom, 28)
+            }
+        }
+    }
+
+    private var appearanceSection: some View {
+        VStack(spacing: 0) {
+            FTSectionBanner(title: L10n.appearance)
+
+            sublabel(L10n.theme)
+            HStack(spacing: 12) {
+                ForEach(AppTheme.allCases) { theme in
+                    themeSwatch(theme)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 22)
+
+            sublabel(L10n.widgetStyle)
+            ForEach(WidgetStyle.allCases) { style in
+                let locked = style.isPremium && !premium.isPremium
+                Button {
+                    if locked { showPremium = true } else { themeStore.select(style) }
+                } label: {
+                    HStack {
+                        Text(style.name)
+                            .font(FT.Typography.body(15))
+                            .foregroundStyle(FT.Palette.textPrimary)
+                        Spacer()
+                        if locked {
+                            Image(systemName: "lock")
+                                .font(.system(size: 12))
+                                .foregroundStyle(FT.Palette.textTertiary)
+                        } else if themeStore.widgetStyle == style {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 13))
+                                .foregroundStyle(FT.Palette.accent)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(height: 48)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(themeStore.widgetStyle == style ? .isSelected : [])
+
+                divider
+            }
+
+            Toggle(isOn: Binding(
+                get: { includeVideos && premium.isPremium },
+                set: { newValue in
+                    guard premium.isPremium else { showPremium = true; return }
+                    includeVideos = newValue
+                    VideoMemories.setEnabled(newValue)
+                }
+            )) {
+                HStack(spacing: 8) {
+                    Text(L10n.includeVideos)
+                        .font(FT.Typography.body(15))
+                        .foregroundStyle(FT.Palette.textPrimary)
+                    if !premium.isPremium {
+                        Image(systemName: "lock")
+                            .font(.system(size: 12))
+                            .foregroundStyle(FT.Palette.textTertiary)
+                    }
+                }
+            }
+            .tint(FT.Palette.accent)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .padding(.bottom, 12)
+        }
+    }
+
+    private func sublabel(_ text: String) -> some View {
+        Text(text)
+            .font(FT.Typography.sectionLabel(12))
+            .tracking(FT.Metric.labelTracking)
+            .foregroundStyle(FT.Palette.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+            .padding(.bottom, 10)
+    }
+
+    private func themeSwatch(_ theme: AppTheme) -> some View {
+        let colors = theme.colors
+        let selected = themeStore.theme == theme
+        let locked = theme.isPremium && !premium.isPremium
+
+        return Button {
+            if locked { showPremium = true } else { themeStore.select(theme) }
+        } label: {
+            VStack(spacing: 6) {
+                ZStack {
+                    colors.background
+                    VStack(spacing: 4) {
+                        Rectangle().fill(colors.surface).frame(height: 8)
+                        Rectangle().fill(colors.textPrimary).frame(width: 22, height: 2)
+                        Rectangle().fill(colors.accent).frame(width: 14, height: 2)
+                    }
+                    .padding(6)
+                    if locked {
+                        Image(systemName: "lock")
+                            .font(.system(size: 11))
+                            .foregroundStyle(colors.textSecondary)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                            .padding(5)
+                    }
+                }
+                .frame(height: 54)
+                .overlay {
+                    Rectangle()
+                        .stroke(selected ? FT.Palette.accent : FT.Palette.separator,
+                                lineWidth: selected ? 2 : FT.Metric.hairline)
+                }
+                Text(theme.name)
+                    .font(FT.Typography.body(11))
+                    .foregroundStyle(selected ? FT.Palette.textPrimary : FT.Palette.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(theme.name)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     // MARK: - Sections
@@ -202,6 +380,12 @@ struct SettingsView: View {
 
             linkRow(L10n.privacyPolicy, symbol: "lock.shield") {
                 showPrivacy = true
+            }
+
+            divider
+
+            linkRow(L10n.restorePurchases, symbol: "arrow.clockwise") {
+                Task { await premium.restore() }
             }
 
             divider

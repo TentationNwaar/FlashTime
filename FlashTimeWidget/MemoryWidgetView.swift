@@ -14,6 +14,15 @@ struct MemoryWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
 
+    /// Habillage choisi (premium). Sans premium : toujours classique.
+    private let style = WidgetStyle.current
+
+    /// Papier du tirage instantané.
+    private let paper = Color(red: 0.969, green: 0.957, blue: 0.933)      // #F7F4EE
+    private let ink = Color(red: 0.165, green: 0.153, blue: 0.141)        // #2A2724
+
+    private var isSmall: Bool { family == .systemSmall }
+
     var body: some View {
         content
             .containerBackground(for: .widget) {
@@ -57,25 +66,115 @@ struct MemoryWidgetView: View {
         }
     }
 
+    @ViewBuilder
     private func memoryContent(_ memory: MemoryPhoto) -> some View {
-        captionLayer(memory)
-            .overlay {
-                if entry.total > 1 {
-                    navigationArrows
-                }
-            }
+        switch style {
+        case .classic:
+            captionLayer(memory)
+                .overlay { arrows(bottomPadding: isSmall ? 22 : 30) }
+        case .photoOnly:
+            Color.clear
+                .overlay { arrows(bottomPadding: 0) }
+        case .hairline:
+            hairlineLayer(memory)
+                .overlay { arrows(bottomPadding: isSmall ? 22 : 30) }
+        case .polaroid:
+            polaroidLayer(memory)
+        }
+    }
+
+    @ViewBuilder
+    private func arrows(bottomPadding: CGFloat) -> some View {
+        if entry.total > 1 {
+            navigationArrows(bottomPadding: bottomPadding)
+        }
     }
 
     /// Flèches latérales : souvenir précédent / suivant de la journée.
-    private var navigationArrows: some View {
+    private func navigationArrows(bottomPadding: CGFloat) -> some View {
         HStack {
             arrowButton("chevron.left", step: -1)
             Spacer(minLength: 0)
             arrowButton("chevron.right", step: 1)
         }
-        .padding(.horizontal, family == .systemSmall ? 4 : 8)
+        .padding(.horizontal, isSmall ? 4 : 8)
         // Les flèches restent au-dessus de la légende, centrées sur la photo.
-        .padding(.bottom, family == .systemSmall ? 22 : 30)
+        .padding(.bottom, bottomPadding)
+    }
+
+    // MARK: - Styles premium
+
+    /// Filet blanc intérieur, légende centrée en bas.
+    private func hairlineLayer(_ memory: MemoryPhoto) -> some View {
+        let inset: CGFloat = isSmall ? 8 : 10
+        return VStack(spacing: 3) {
+            Spacer(minLength: 0)
+            Text(memory.title)
+                .font(titleFont)
+                .tracking(titleTracking)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            if !isSmall {
+                Text(memory.subtitle)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineLimit(1)
+            }
+        }
+        .foregroundStyle(.white)
+        .shadow(color: .black.opacity(0.6), radius: 5, y: 1)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, inset + 8)
+        .padding(.bottom, inset + (isSmall ? 9 : 12))
+        .background(
+            LinearGradient(
+                colors: [.black.opacity(0), .black.opacity(0.45)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+        )
+        .overlay {
+            Rectangle()
+                .stroke(.white.opacity(0.85), lineWidth: 1)
+                .padding(inset)
+        }
+    }
+
+    /// Tirage instantané : photo encadrée de papier, légende manuscrite dessous.
+    private func polaroidLayer(_ memory: MemoryPhoto) -> some View {
+        let border: CGFloat = isSmall ? 9 : 12
+        return VStack(spacing: 0) {
+            ZStack {
+                Color.black.opacity(0.08)
+                if let data = entry.imageData, let image = UIImage(data: data) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .overlay { arrows(bottomPadding: 0) }
+
+            HStack(alignment: .firstTextBaseline) {
+                Text(memory.title)
+                    .font(.system(size: isSmall ? 12 : 15, weight: .regular, design: .serif).italic())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 6)
+                if !isSmall {
+                    Text(memory.subtitle)
+                        .font(.system(size: 10))
+                        .foregroundStyle(ink.opacity(0.55))
+                        .lineLimit(1)
+                }
+            }
+            .foregroundStyle(ink)
+            .padding(.top, isSmall ? 6 : 9)
+            .padding(.bottom, isSmall ? 1 : 3)
+        }
+        .padding([.top, .horizontal], border)
+        .padding(.bottom, border - 2)
     }
 
     private func arrowButton(_ symbol: String, step: Int) -> some View {
@@ -177,7 +276,9 @@ struct MemoryWidgetView: View {
 
     @ViewBuilder
     private var background: some View {
-        if let data = entry.imageData, let image = UIImage(data: data) {
+        if style == .polaroid, case .memory = entry.state {
+            paper
+        } else if let data = entry.imageData, let image = UIImage(data: data) {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()

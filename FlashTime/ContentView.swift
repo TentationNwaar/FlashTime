@@ -21,9 +21,12 @@ struct ContentView: View {
     @StateObject private var viewModel = MemoriesViewModel()
     @StateObject private var coach = CoachMarks()
     @ObservedObject private var languageStore = LanguageStore.shared
+    @ObservedObject private var premium = PremiumStore.shared
+    @ObservedObject private var themeStore = ThemeStore.shared
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     /// Tutoriel d'accueil terminé. Remis à faux pour le rejouer.
     @AppStorage("onboarding.completed") private var introCompleted = false
@@ -34,6 +37,8 @@ struct ContentView: View {
     @State private var showDatePicker = false
     @State private var replayAfterSettings = false
     @State private var viewer: ViewerRequest?
+    @State private var showPremium = false
+    @State private var showFavorites = false
     /// Les bulles n'apparaissent qu'une fois l'écran stabilisé.
     @State private var coachReady = false
 
@@ -52,6 +57,26 @@ struct ContentView: View {
             }
         }
         .environment(\.locale, languageStore.language.locale)
+        .preferredColorScheme(FT.colorScheme)
+        .task {
+            // Droits d'achat : vérifiés à chaque lancement auprès de StoreKit.
+            await premium.load()
+        }
+        .onChange(of: premium.isPremium) { _, _ in
+            viewModel.refreshFavorites()
+            Task { await viewModel.reload() }
+        }
+        .sheet(isPresented: $showPremium) {
+            PremiumView()
+                .environment(\.locale, languageStore.language.locale)
+        }
+        .sheet(isPresented: $showFavorites, onDismiss: { viewModel.refreshFavorites() }) {
+            FavoritesView(
+                isHidden: { viewModel.isHidden($0) },
+                onToggleHidden: { viewModel.toggleHidden($0) }
+            )
+            .environment(\.locale, languageStore.language.locale)
+        }
         .task {
             viewModel.refreshAccessState()
 
@@ -91,7 +116,8 @@ struct ContentView: View {
                 memories: request.memories,
                 startID: request.id,
                 isHidden: { viewModel.isHidden($0) },
-                onToggleHidden: { viewModel.toggleHidden($0) }
+                onToggleHidden: { viewModel.toggleHidden($0) },
+                onFavoritesChanged: { viewModel.refreshFavorites() }
             )
         }
         .onChange(of: scenePhase) { _, phase in
@@ -140,6 +166,8 @@ struct ContentView: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
+                // Un changement de thème reconstruit l'écran avec les nouvelles couleurs.
+                .id(themeStore.theme)
                 .transition(.opacity)
             }
         }
@@ -212,6 +240,18 @@ struct ContentView: View {
                 }
             } trailing: {
                 if viewModel.accessState.canReadLibrary {
+                    Button {
+                        if premium.isPremium { showFavorites = true } else { showPremium = true }
+                    } label: {
+                        Image(systemName: "heart")
+                            .font(.system(size: 15, weight: .light))
+                            .foregroundStyle(FT.Palette.textSecondary)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.favorites)
+
                     Button {
                         showSettings = true
                     } label: {
@@ -348,7 +388,7 @@ struct ContentView: View {
         }
         .background(FT.Palette.background.ignoresSafeArea())
         .environment(\.locale, languageStore.language.locale)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(FT.colorScheme)
         .presentationDetents([.height(520), .large])
     }
 
@@ -422,8 +462,12 @@ struct ContentView: View {
 
     private func grid(for photos: [MemoryPhoto]) -> some View {
         LazyVGrid(
-            // Colonnes adaptatives : 3 sur iPhone, davantage sur iPad.
-            columns: [GridItem(.adaptive(minimum: 104, maximum: 220), spacing: FT.Metric.gridSpacing)],
+            // Colonnes adaptatives : 3 sur iPhone, 4 à 5 sur iPad.
+            columns: [GridItem(
+                .adaptive(minimum: sizeClass == .regular ? 200 : 104,
+                          maximum: sizeClass == .regular ? 320 : 220),
+                spacing: FT.Metric.gridSpacing
+            )],
             spacing: FT.Metric.gridSpacing
         ) {
             ForEach(photos) { photo in
@@ -459,6 +503,8 @@ struct ContentView: View {
 
     private func accessibilityLabel(for photo: MemoryPhoto) -> String {
         var parts = [photo.title, photo.subtitle]
+        if photo.isVideo { parts.append(photo.durationText) }
+        if viewModel.isFavorite(photo) { parts.append(L10n.favorites) }
         if viewModel.isHidden(photo) { parts.append(L10n.hiddenFromWidget) }
         return parts.joined(separator: ", ")
     }
@@ -480,11 +526,23 @@ struct ContentView: View {
                 if isHidden {
                     Image(systemName: "eye.slash")
                         .font(.system(size: 10, weight: .light))
-                        .foregroundStyle(FT.Palette.textPrimary)
+                        .foregroundStyle(.white)
                         .padding(5)
                         .background(.black.opacity(0.45))
                         .padding(5)
                 }
+            }
+            .overlay(alignment: .topLeading) {
+                if viewModel.isFavorite(photo) {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.6), radius: 2)
+                        .padding(6)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                MediaBadge(memory: photo)
             }
             .overlay {
                 if viewModel.isSelecting {
@@ -496,7 +554,7 @@ struct ContentView: View {
                 if viewModel.isSelecting {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 16, weight: .light))
-                        .foregroundStyle(isSelected ? FT.Palette.accent : FT.Palette.textPrimary.opacity(0.7))
+                        .foregroundStyle(isSelected ? FT.Palette.accent : Color.white.opacity(0.8))
                         .shadow(color: .black.opacity(0.5), radius: 2)
                         .padding(6)
                 }
@@ -505,6 +563,15 @@ struct ContentView: View {
 
     @ViewBuilder
     private func contextActions(for photo: MemoryPhoto) -> some View {
+        Button {
+            if !viewModel.toggleFavorite(photo) { showPremium = true }
+        } label: {
+            Label(
+                viewModel.isFavorite(photo) ? L10n.removeFavorite : L10n.addFavorite,
+                systemImage: viewModel.isFavorite(photo) ? "heart.slash" : (premium.isPremium ? "heart" : "lock")
+            )
+        }
+
         Button {
             viewModel.toggleHidden(photo)
         } label: {
@@ -567,6 +634,9 @@ struct ContentView: View {
 
     private func settingsDismissed() {
         viewModel.refreshHidden()
+        viewModel.refreshFavorites()
+        // L'option « vidéos du jour » a pu changer.
+        Task { await viewModel.reload() }
         if replayAfterSettings {
             replayAfterSettings = false
             coach.reset()

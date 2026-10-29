@@ -19,7 +19,7 @@ description 4000.
 | Catégorie secondaire | Style de vie (Lifestyle) |
 | Prix | Gratuit |
 | Classification par âge | 4+ (répondre « Non / Aucun » à toutes les questions) |
-| Copyright | 2026 Maxence Weyermann |
+| Copyright | 2026 BubbleBlack |
 | URL de confidentialité | https://tentationnwaar.github.io/FlashTime/privacy.html |
 | URL d'assistance | https://tentationnwaar.github.io/FlashTime/ |
 | Confidentialité de l'app | « Données non collectées » (Data Not Collected) |
@@ -163,3 +163,39 @@ same calendar day in previous years, in the app and in a Home Screen widget.
   FlashTime.
 - All processing happens on device. No data is collected or transmitted.
 ```
+
+
+---
+
+## Achats intégrés — textes à saisir
+
+Nom : 30 caractères maximum. Description : 45 caractères maximum.
+
+| Produit | Langue | Nom affiché | Description |
+|---|---|---|---|
+| flashtime.premium.unlock | EN | FlashTime Premium | Widget styles, favourites, themes and videos. |
+| | FR | FlashTime Premium | Styles, favoris, thèmes et vidéos. |
+| | IT | FlashTime Premium | Stili, preferiti, temi e video. |
+| | DE | FlashTime Premium | Stile, Favoriten, Themen und Videos. |
+| flashtime.tip.small | EN | Small thanks | A small tip to support FlashTime. |
+| | FR | Petit merci | Un petit pourboire pour soutenir FlashTime. |
+| | IT | Piccolo grazie | Una piccola mancia per sostenere FlashTime. |
+| | DE | Kleines Danke | Ein kleines Trinkgeld für FlashTime. |
+| flashtime.tip.medium | EN | Big thanks | A tip to support FlashTime. |
+| | FR | Grand merci | Un pourboire pour soutenir FlashTime. |
+| | IT | Grande grazie | Una mancia per sostenere FlashTime. |
+| | DE | Großes Danke | Ein Trinkgeld für FlashTime. |
+| flashtime.tip.large | EN | Huge thanks | A generous tip to support FlashTime. |
+| | FR | Immense merci | Un pourboire généreux pour FlashTime. |
+| | IT | Enorme grazie | Una mancia generosa per FlashTime. |
+| | DE | Riesiges Danke | Ein großzügiges Trinkgeld für FlashTime. |
+
+Ligne à ajouter à la fin de chaque description de l'app :
+
+- EN : « FlashTime is free. FlashTime Premium, a one-time purchase with no subscription, adds widget styles, favourites, colour themes and videos. »
+- FR : « FlashTime est gratuit. FlashTime Premium, un achat unique sans abonnement, ajoute des styles de widget, les favoris, des thèmes de couleur et les vidéos. »
+- IT : « FlashTime è gratuita. FlashTime Premium, un acquisto unico senza abbonamento, aggiunge stili del widget, preferiti, temi di colore e video. »
+- DE : « FlashTime ist kostenlos. FlashTime Premium, ein einmaliger Kauf ohne Abo, bietet Widget-Stile, Favoriten, Farbthemen und Videos. »
+
+Confidentialité de l'app : la réponse « Données non collectées » reste
+valable. Les achats sont traités par Apple et l'app ne transmet aucune donnée.

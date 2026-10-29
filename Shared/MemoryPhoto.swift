@@ -14,6 +14,25 @@ nonisolated struct MemoryPhoto: Identifiable, Hashable, Sendable {
     let creationDate: Date
     /// Nombre d'années écoulées depuis la prise de vue (>= 1).
     let yearsAgo: Int
+    /// Nature du souvenir. Les vidéos ne sont proposées qu'avec le premium,
+    /// et jamais dans le widget.
+    var kind: Kind = .photo
+    /// Durée, pour les vidéos.
+    var duration: TimeInterval = 0
+
+    enum Kind: Sendable, Hashable {
+        case photo
+        case livePhoto
+        case video
+    }
+
+    var isVideo: Bool { kind == .video }
+
+    /// « 0:42 », pour le badge des vidéos.
+    var durationText: String {
+        let total = Int(duration.rounded())
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
 
     /// Titre affiché sur le widget : « Il y a 10 ans », dans la langue choisie.
     var title: String {
